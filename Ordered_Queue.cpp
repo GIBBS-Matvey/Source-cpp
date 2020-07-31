@@ -1,41 +1,63 @@
+#include <crtdbg.h>
 #include <iostream>
 #include <cstring>
+
 using namespace std;
+
 
 struct Element {
     int value;
     int addIndex;
 };
+
+
 struct Operation {
     char operationType[11];
 };
+
+
 int parent(int index) {
     return (index - 1) / 2;
 }
+
 int leftChild(int index) {
     return 2 * index + 1;
 }
+
 int rightChild(int index) {
     return 2 * index + 2;
 }
+
 void addElement(Element *heap, int *mass, int element);
+
 void siftUp(Element *heap, int* mass, int index);
+
 void siftDown(Element *heap, int *mass, int index);
+
 void deleteElement(Element *heap, int *mass, int deleteIndex);
+
 void changeElement(Element *heap, int *mass, int changeIndex, int newValue);
+
 void extractMin(Element *heap, int *mass);
+
 void getMin(Element *heap);
+
 void size();
+
 void clear(int *mass);
+
 int addedIndex = 0;
 int currPyramidSize = 0;
 int numberOfOperation;
+
+
 int main () {
     cin >> numberOfOperation;
     Element *heap = new Element[numberOfOperation];
     int *mass = new int[numberOfOperation];
     int count = 0;
     int newElement, deleteIndex, changeIndex;
+
     while (count < numberOfOperation) {
         Operation command;
         cin >> command.operationType;
@@ -66,9 +88,15 @@ int main () {
         }
         ++count;
     }
+
     delete []mass;
     delete []heap;
+
+    std::cout << "valgrind checking is "<< _CrtDumpMemoryLeaks();
+
 }
+
+
 void addElement(Element *heap, int *mass, int element) {
     ++addedIndex;
     ++currPyramidSize;
@@ -78,6 +106,7 @@ void addElement(Element *heap, int *mass, int element) {
     siftUp(heap, mass, currPyramidSize - 1);
     cout << "ok" << endl;
 }
+
 void siftUp(Element *heap, int *mass, int index) {
     while (parent(index) >= 0 && heap[index].value < heap[parent(index)].value) {
         swap(heap[index], heap[parent(index)]);
@@ -85,16 +114,18 @@ void siftUp(Element *heap, int *mass, int index) {
         index = parent(index);
     }
 }
+
 void siftDown(Element *heap, int *mass, int index) {
     while ((leftChild(index) <= currPyramidSize - 1 && heap[leftChild(index)].value < heap[index].value) ||
            (rightChild(index) <= currPyramidSize - 1 && heap[rightChild(index)].value < heap[index].value)) {
         int indexMin = (heap[rightChild(index)].value < heap[leftChild(index)].value && rightChild(index) <=
-                currPyramidSize - 1) ? rightChild(index) : leftChild(index);
+                                                                                        currPyramidSize - 1) ? rightChild(index) : leftChild(index);
         swap(heap[index], heap[indexMin]);
         swap(mass[heap[index].addIndex], mass[heap[indexMin].addIndex]);
         index = indexMin;
     }
 }
+
 void deleteElement(Element *heap, int *mass, int deleteIndex) {
     if (currPyramidSize >= 1 && mass[deleteIndex - 1] <= currPyramidSize - 1 && deleteIndex <= addedIndex) {
         int heapRemIndex = mass[deleteIndex - 1];
@@ -110,6 +141,7 @@ void deleteElement(Element *heap, int *mass, int deleteIndex) {
         cout << "error" << endl;
     }
 }
+
 void changeElement(Element *heap, int *mass, int changeIndex, int newValue) {
     if (currPyramidSize >= 1 && mass[changeIndex - 1] <= currPyramidSize - 1 && changeIndex <= addedIndex) {
         heap[mass[changeIndex - 1]].value = newValue;
@@ -121,6 +153,7 @@ void changeElement(Element *heap, int *mass, int changeIndex, int newValue) {
         cout << "error" << endl;
     }
 }
+
 void extractMin(Element *heap, int *mass) {
     if (currPyramidSize >= 1) {
         cout << heap[0].value << endl;
@@ -134,6 +167,7 @@ void extractMin(Element *heap, int *mass) {
         cout << "error" << endl;
     }
 }
+
 void getMin(Element *heap) {
     if (currPyramidSize >= 1) {
         cout << heap[0].value << endl;
@@ -142,9 +176,11 @@ void getMin(Element *heap) {
         cout << "error" << endl;
     }
 }
+
 void size() {
     cout << currPyramidSize << endl;
 }
+
 void clear(int *mass) {
     currPyramidSize = 0;
     for (int i = 0; i < addedIndex; ++i) {
