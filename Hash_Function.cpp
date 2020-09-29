@@ -48,7 +48,8 @@ public:
 
     void Initialize(const std::vector<int>& numbers) {
         buckets_.reserve(numbers.size() * numbers.size());
-        std::mt19937 generator;
+        std::random_device dev;
+        std::mt19937 generator(dev());
         do {
             hashFunction_ = GenerateHashFunction(&generator, numbers.size());
         } while(CheckCollisions(CountDistributionByBuckets(numbers, buckets_.size(),
@@ -57,6 +58,14 @@ public:
             buckets_[hashFunction_.GetHashValue(value)] = value;
         }
     }
+
+    void PrintHashTable() const {
+        for (const auto& value :  buckets_) {
+            std::cout << value << ' ';
+        }
+    }
+
+
 
     bool Contains(const int number) const {
         // TODO
@@ -72,7 +81,8 @@ private:
 public:
     void Initialize(const std::vector<int>& numbers) {
         buckets_.reserve(numbers.size());
-        std::mt19937 generator;
+        std::random_device dev;
+        std::mt19937 generator(dev());
 
         do {
             hash_function_ = GenerateHashFunction(&generator, numbers.size());
@@ -82,24 +92,36 @@ public:
         std::vector<int> distributeBuffer(std::move(CountDistributionByBuckets(numbers, numbers.size(),
                                                                                hash_function_)));
         std::vector<std::vector<int>> valuesBuffer(numbers.size());
-        for (size_t i = 0; i < numbers.size(); ++i) {
-            valuesBuffer[i].reserve(distributeBuffer[i]);
+        
+        for (const auto& value : numbers) {
+            valuesBuffer[hash_function_.GetHashValue(value)].push_back(value);
         }
 
-        // TODO
+        for (size_t i = 0; i < valuesBuffer.size(); ++i) {
+            buckets_[i].Initialize(valuesBuffer[i]);
+        }
 
     }
 
-    bool Contains(int number) const;
+    void PrintFixedSet() {
+        for (const auto& bucket : buckets_) {
+            bucket.PrintHashTable();
+            std::cout << std::endl;
+        }
+    }
+
+    bool Contains(int number) const {
+        // TODO
+    }
 };
 
 
-HashFunction GenerateHashFunction(std::mt19937 *generator, int64_t numbersOfValues) {
+HashFunction GenerateHashFunction(std::mt19937 *generator, int64_t numberOfValues) {
     std::uniform_int_distribution<int> first_distribution(1, kPrimeNumber - 1);
-    int first_parameter = first_distribution(generator);
+    int first_parameter = first_distribution(*generator);
     std::uniform_int_distribution<int> second_distribution(0, kPrimeNumber - 1);
-    int second_parameter = second_distribution(generator);
-    return {first_parameter, second_parameter, kPrimeNumber, numbersOfValues};
+    int second_parameter = second_distribution(*generator);
+    return {first_parameter, second_parameter, kPrimeNumber, numberOfValues};
 }
 
 
@@ -132,4 +154,15 @@ bool CheckCollisions(const std::vector<int>& distributeBucket) {
         }
     }
     return true;
+}
+
+
+
+int main() {
+    FixedSet fixedSet;
+    std::vector<int> buffer = {2, 13, 89, 55, 69, 34, 9, 21, 8, 91};
+    fixedSet.Initialize(buffer);
+
+    fixedSet.PrintFixedSet();
+    return 0;
 }
