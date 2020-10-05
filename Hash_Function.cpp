@@ -59,12 +59,8 @@ public:
     }
 
     bool Contains(const int target) const {
-        if (buckets_.empty()) {
-            return false;
-        } else {
-            return buckets_[hashFunction_.GetHashValue(target)].has_value() &&
-                    buckets_[hashFunction_.GetHashValue(target)] == target;
-        }
+        return !buckets_.empty() && (buckets_[hashFunction_.GetHashValue(target)].has_value() &&
+                                    buckets_[hashFunction_.GetHashValue(target)] == target);
     }
 };
 
