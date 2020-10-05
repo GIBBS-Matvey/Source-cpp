@@ -96,7 +96,6 @@ public:
         }
     }
 
-
     bool Contains(const int target) const {
         return buckets_[hash_function_.GetHashValue(target)].Contains(target);
     }
@@ -152,14 +151,12 @@ int main() {
     FixedSet fixedSet;
     std::vector<int> buffer = {2, 13, 89, 55, 69, 34, 9, 21, 8, 91};
     fixedSet.Initialize(buffer);
-
+    
     std::vector<int> checking_buffer = {2, 40, 13, 67, 8, 1, 55, 6};
-
+    
     for (const auto& value : checking_buffer) {
         std::cout << fixedSet.Contains(value) << ' ';
     }
-
-
-
+    
     return 0;
 }
