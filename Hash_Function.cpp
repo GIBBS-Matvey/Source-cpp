@@ -3,6 +3,8 @@
 #include <vector>
 #include <random>
 
+// TODO Random Library
+
 const size_t kPrimeNumber = 2000011;
 const size_t kMaxTimes = 4;
 
@@ -47,7 +49,6 @@ public:
     HashTable() = default;
 
     void Initialize(const std::vector<int>& numbers) {
-
         buckets_.resize(numbers.size() * numbers.size());
         do {
             hashFunction_ = GenerateHashFunction(numbers.size());
@@ -104,7 +105,7 @@ public:
 
 HashFunction GenerateHashFunction(size_t numberOfValues) {
     std::random_device dev;
-    std::mt19937 generator(dev());
+    std::mt19937 generator(dev()); // TODO
     std::uniform_int_distribution<size_t> first_distribution(1, kPrimeNumber - 1);
     size_t first_parameter = first_distribution(generator);
     std::uniform_int_distribution<size_t> second_distribution(0, kPrimeNumber - 1);
@@ -151,12 +152,12 @@ int main() {
     FixedSet fixedSet;
     std::vector<int> buffer = {2, 13, 89, 55, 69, 34, 9, 21, 8, 91};
     fixedSet.Initialize(buffer);
-    
+
     std::vector<int> checking_buffer = {2, 40, 13, 67, 8, 1, 55, 6};
-    
+
     for (const auto& value : checking_buffer) {
         std::cout << fixedSet.Contains(value) << ' ';
     }
-    
+
     return 0;
 }
