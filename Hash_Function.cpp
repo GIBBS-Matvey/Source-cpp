@@ -3,11 +3,9 @@
 #include <vector>
 #include <random>
 
-// TODO Random Library
 
 const size_t kPrimeNumber = 2000011;
 const size_t kMaxTimes = 4;
-
 
 
 class HashFunction {
@@ -17,16 +15,16 @@ private:
 public:
     HashFunction() = default;
     explicit HashFunction(size_t first, size_t second, size_t prime, size_t number) : first_parameter_(first),
-                                                                                 second_parameter_(second),
-                                                                                 prime_number_(prime),
-                                                                                 numberOfValues_(number) {}
+                                                                                      second_parameter_(second),
+                                                                                      prime_number_(prime),
+                                                                                      numberOfValues_(number) {}
     size_t GetHashValue(const int value) const {
         return ((first_parameter_ * value + second_parameter_) % prime_number_) % numberOfValues_;
     }
 };
 
 
-HashFunction GenerateHashFunction(size_t numberOfValues);
+HashFunction GenerateHashFunction(size_t numberOfValues, std::mt19937* generator_ptr);
 
 std::vector<int> CountDistributionByBuckets(const std::vector<int>& numbers, size_t buckets_size,
                                             HashFunction hashFunction);
@@ -50,8 +48,12 @@ public:
 
     void Initialize(const std::vector<int>& numbers) {
         buckets_.resize(numbers.size() * numbers.size());
+
+        std::random_device dev;
+        std::mt19937 generator(dev());
+
         do {
-            hashFunction_ = GenerateHashFunction(numbers.size());
+            hashFunction_ = GenerateHashFunction(numbers.size(), &generator);
         } while(CheckCollisions(CountDistributionByBuckets(numbers, numbers.size(),
                                                            hashFunction_)));
         for (const auto& value: numbers) {
@@ -61,7 +63,7 @@ public:
 
     bool Contains(const int target) const {
         return !buckets_.empty() && (buckets_[hashFunction_.GetHashValue(target)].has_value() &&
-                                    buckets_[hashFunction_.GetHashValue(target)] == target);
+                                     buckets_[hashFunction_.GetHashValue(target)] == target);
     }
 };
 
@@ -75,8 +77,11 @@ public:
     void Initialize(const std::vector<int>& numbers) {
         buckets_.resize(numbers.size());
 
+        std::random_device dev;
+        std::mt19937 generator(dev());
+
         do {
-            hash_function_ = GenerateHashFunction(numbers.size());
+            hash_function_ = GenerateHashFunction(numbers.size(), &generator);
         } while(CheckHashFunction(numbers, CountSquaresOfBucketsSizes(
                 CountDistributionByBuckets(numbers, numbers.size(),hash_function_))));
 
@@ -103,13 +108,11 @@ public:
 };
 
 
-HashFunction GenerateHashFunction(size_t numberOfValues) {
-    std::random_device dev;
-    std::mt19937 generator(dev()); // TODO
+HashFunction GenerateHashFunction(size_t numberOfValues, std::mt19937* generator_ptr) {
     std::uniform_int_distribution<size_t> first_distribution(1, kPrimeNumber - 1);
-    size_t first_parameter = first_distribution(generator);
+    size_t first_parameter = first_distribution(*generator_ptr);
     std::uniform_int_distribution<size_t> second_distribution(0, kPrimeNumber - 1);
-    size_t second_parameter = second_distribution(generator);
+    size_t second_parameter = second_distribution(*generator_ptr);
     return HashFunction(first_parameter, second_parameter, kPrimeNumber, numberOfValues);
 }
 
@@ -161,3 +164,4 @@ int main() {
 
     return 0;
 }
+
