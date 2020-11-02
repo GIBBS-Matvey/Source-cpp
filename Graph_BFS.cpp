@@ -17,9 +17,9 @@ private:
     std::vector<bool> used;
 
     void Reset() {
-        distances.assign(vertex_number, INTMAX);
-        used.assign(vertex_number, false);
-        parent.assign(vertex_number, -1);
+        distances.resize(vertex_number, INTMAX);
+        used.resize(vertex_number, false);
+        parent.resize(vertex_number, -1);
     }
 
 public:
@@ -36,6 +36,7 @@ public:
         std::queue<int> queue_bfs;
         queue_bfs.push(start);
         distances[start] = 0;
+        used[start] = true;
         parent[start] = -1;
 
         while(!queue_bfs.empty()) {
@@ -55,14 +56,15 @@ public:
 
     void PrintPath(const int& vertex) {
         std::vector<int> result;
-        result.reserve(distances[vertex + 1]);
+        result.reserve(distances[vertex] + 1);
         int current = vertex;
+        result.push_back(current);
         while(parent[current] != -1) {
             current = parent[current];
-            result.push_back(parent[current]);
+            result.push_back(current);
         }
         for (auto it = result.rbegin(); it != result.rend(); ++it) {
-            std::cout << *it << "->";
+            std::cout << *it << ' ';
         }
         std::cout << std::endl;
     }
@@ -90,11 +92,11 @@ int main() {
     std::vector<size_t> result = graph.Bfs(start);
 
     for (int vertex = 0; vertex < vertex_number; ++vertex) {
-        std::cout << result[vertex] << std::endl;
         if (result[vertex] == INTMAX) {
             std::cout << -1 << std::endl;
-            continue;;
+            continue;
         }
+        std::cout << result[vertex] << std::endl;
         graph.PrintPath(vertex);
     }
     return 0;
