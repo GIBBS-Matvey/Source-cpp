@@ -8,7 +8,6 @@ private:
     std::vector<std::vector<int>> graph;
     size_t dimM, dimN;
     std::vector<std::vector<bool>> used;
-    std::vector<std::vector<bool>> hasDrain;
     std::vector<std::vector<bool>> completed;
     size_t drainNumber;
 
@@ -59,10 +58,6 @@ public:
         for (int i = 0; i < dimM; ++i) {
             used[i].resize(dimN, false);
         }
-        hasDrain.resize(dimM, std::vector<bool>());
-        for (int i = 0; i < dimM; ++i) {
-            hasDrain[i].resize(dimN, false);
-        }
         completed.resize(dimM, std::vector<bool>());
         for (int i = 0; i < dimM; ++i) {
             completed[i].resize(dimN, false);
@@ -79,45 +74,31 @@ public:
         std::cout << std::endl;
     }
 
-    bool WillDrainBFS(const std::pair<int, int>& position) {
-
-        for (const auto& neighbour : getAdj(position)) {
-            if (getValue(neighbour) < getValue(position) || completed[neighbour.first][neighbour.second] || hasDrain[neighbour.first][neighbour.second]) {
-                completed[position.first][position.second] = true;
-                return false;
-            }
-        }
-
+    bool WillDrainBfs(const std::pair<int, int>& position) {
         std::queue<std::pair<int, int>> queue;
+        queue.push(position);
         used[position.first][position.second] = true;
 
-        for (const auto& neighbour : getAdj(position)) {
-            if (getValue(neighbour) == getValue(position) && !used[neighbour.first][neighbour.second]) {
-                queue.push(neighbour);
-                used[neighbour.first][neighbour.second] = true;
-            }
-        }
-
-        while (!queue.empty()) {
-            std::pair<int, int> tmp_position = queue.front();
+        do {
+            std::pair<int, int> tmpPosition = queue.front();
             queue.pop();
 
-            for (const auto& neighbour : getAdj(tmp_position)) {
-                if (getValue(neighbour) < getValue(tmp_position) || completed[neighbour.first][neighbour.second] || hasDrain[neighbour.first][neighbour.second]) {
-                    completed[tmp_position.first][tmp_position.second] = true;
+            for (const auto& neighbour : getAdj(tmpPosition)) {
+                if (getValue(neighbour) < getValue(tmpPosition) || completed[neighbour.first][neighbour.second]) {
+                    completed[tmpPosition.first][tmpPosition.second] = true;
                     return false;
                 }
             }
 
-            for (const auto& neighbour : getAdj(tmp_position)) {
-                if (getValue(neighbour) == getValue(tmp_position) && !used[neighbour.first][neighbour.second]) {
+            for (const auto& neighbour : getAdj(tmpPosition)) {
+                if (getValue(neighbour) == getValue(tmpPosition) && !used[neighbour.first][neighbour.second]) {
                     queue.push(neighbour);
                     used[neighbour.first][neighbour.second] = true;
                 }
             }
-        }
+        } while (!queue.empty());
 
-        hasDrain[position.first][position.second] = true;
+        completed[position.first][position.second] = true;
         return true;
     }
 
@@ -126,7 +107,7 @@ public:
         for (int i = 0; i < dimM; ++i) {
             for (int j = 0; j < dimN; ++j) {
                 if (!completed[i][j]) {
-                    drainNumber += WillDrainBFS({i, j});
+                    drainNumber += WillDrainBfs({i, j});
                     usedReset();
                 }
             }
