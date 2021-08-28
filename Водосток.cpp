@@ -125,7 +125,7 @@ public:
         drainNumber = 0;
         for (int i = 0; i < dimM; ++i) {
             for (int j = 0; j < dimN; ++j) {
-                if (!used[i][j]) {
+                if (!completed[i][j]) {
                     drainNumber += WillDrainBFS({i, j});
                     usedReset();
                 }
