@@ -5,34 +5,42 @@
 class PathVisitor {
     char color;
     std::vector<std::vector<bool>> isColorPath;
-    const std::vector<std::vector<char>>& edges;
+    size_t vertexNumber;
 public:
-    PathVisitor(const std::vector<std::vector<char>>& edges, char color) : color(color), edges(edges),
-    isColorPath(edges.size(), std::vector<bool>(edges.size(), false)) {}
+    PathVisitor(size_t vertexNumber, char color) : color(color),
+    isColorPath(vertexNumber, std::vector<bool>(vertexNumber, false)) {}
 
-    void initColorPath(size_t from, size_t to) {
+    void initColorPath(int from, int to) {
         isColorPath[from][to] = true;
     }
 
-    bool hasColorPath(size_t from, size_t to) {
+    bool hasColorPath(int from, int to) {
         return isColorPath[from][to];
     }
 
-    bool checkColor(size_t from, size_t to) {
-        return edges[from][to] == color;
+    void PrintPaths() const {
+        for (int i = 0; i < vertexNumber; ++i) {
+            for (int j = i + 1; j < vertexNumber; ++j) {
+                std::cout << i << ',' << j << " : " <<  isColorPath[i][j] << std::endl;
+            }
+        }
+    }
+
+    char checkColor() {
+        return color;
     }
 };
 
 
 class RedPathVisitor : public PathVisitor {
 public:
-    RedPathVisitor(const std::vector<std::vector<char>>& edgesPtr) : PathVisitor(edgesPtr, 'R') {}
+    RedPathVisitor(size_t vertexNumber) : PathVisitor(vertexNumber, 'R') {}
 };
 
 
 class BluePathVisitor : public PathVisitor {
 public:
-    BluePathVisitor(const std::vector<std::vector<char>>& edgesPtr) : PathVisitor(edgesPtr, 'B') {}
+    BluePathVisitor(size_t vertexNumber) : PathVisitor(vertexNumber, 'B') {}
 };
 
 
@@ -49,45 +57,64 @@ public:
     }
 
     template<typename ColorVisitor>
-    std::pair<size_t, size_t> HasPath(ColorVisitor& colorVisitor) {
-        for (int i = vertexNumber - 2; i >= 0; --i) {       // run from up vertexes to save info about color paths
+    void HasPath(ColorVisitor& colorVisitor) {
+        for (int i = vertexNumber - 1; i >= 1; --i) {       // run from up vertexes to save info about color paths
             for (int j = i - 1; j >= 0; --j) {
                 if (HasPathVisit(j, i, colorVisitor)) {
                     colorVisitor.initColorPath(j, i);
-                    return {j, i};
                 }
             }
         }
     }
 
     template<typename ColorVisitor>
-    bool HasPathVisit(size_t tmp, size_t target, ColorVisitor& colorVisitor) {
-        if (tmp == target || colorVisitor.hasColorPath(tmp, target))
+    bool HasPathVisit(size_t tmp, size_t target, ColorVisitor& vis) {
+
+        if (tmp == target - 1 && edges[tmp][target] == vis.checkColor()/*vis.checkColor(tmp, target))*/ || vis.hasColorPath(tmp, target)) {
             return true;
-        for (size_t neiVertex = tmp + 1; neiVertex <= target; ++neiVertex) {
-            if (edges[tmp][neiVertex] == colorVisitor.checkColor(tmp, neiVertex)) {
-                HasPathVisit(neiVertex, target, colorVisitor);
+        }
+
+        for (int neiVertex = tmp + 1; neiVertex <= target; ++neiVertex) {
+            if (edges[tmp][neiVertex] == vis.checkColor() /*vis.checkColor(tmp, neiVertex)*/) {
+                vis.initColorPath(tmp, neiVertex);
+                if (HasPathVisit(neiVertex, target, vis)) {
+                    return true;
+                }
             }
         }
         return false;
     }
-    
+
     bool checkColorPaths() {
-        RedPathVisitor redPathVisitor(edges);
-        BluePathVisitor bluePathVisitor(edges);
-        std::pair<size_t, size_t> psbPair = HasPath(redPathVisitor);
-        if (HasPathVisit(psbPair.first, psbPair.second, bluePathVisitor)) {
-            return true;
+        BluePathVisitor bluePathVisitor(vertexNumber);
+        RedPathVisitor redPathVisitor(vertexNumber);
+        HasPath(redPathVisitor);
+        HasPath(bluePathVisitor);
+
+        /*std::cout << "red paths:" << std::endl;
+        redPathVisitor.PrintPaths();
+
+        std::cout << "blue paths:" << std::endl;
+        bluePathVisitor.PrintPaths();*/
+
+        for (int i = 0; i < vertexNumber; ++i) {
+            for (int j = i + 1; j < vertexNumber; ++j) {
+                if (redPathVisitor.hasColorPath(i, j) && bluePathVisitor.hasColorPath(i, j)) {
+                    return true;
+                }
+            }
         }
-        //todo
+        return false;
     }
 
-    void Print() const {
-        for (const auto& row : edges)
-            for (auto color : row)
-                std::cout << color << ' ';
+    /*void Print() const {
+        for (int i = 0; i < vertexNumber - 1; ++i) {
+            for (int j = i + 1; j < vertexNumber; ++j) {
+                std::cout << edges[i][j] << ' ';
+            }
             std::cout << std::endl;
-    }
+        }
+    }*/
 
 };
 
@@ -103,6 +130,15 @@ int main() {
             graph.addEdge(i, j, tmpColor);
         }
     }
-    //graph.Print();
+    
+    if (!graph.checkColorPaths()) {
+        std::cout << "YES";
+    } else {
+        std::cout << "NO";
+    }
     return 0;
 }
+
+/*3
+RB
+R*/
