@@ -1,2 +1,2 @@
 # Идея решения
-![Иллюстрация к проекту](https://github.com/jon/coolproject/raw/master/image/image.png)
+![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Intersecting_segments/Images/solution_idea.png)
