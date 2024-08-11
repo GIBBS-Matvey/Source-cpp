@@ -6,7 +6,7 @@
 
 Обратите внимание, что пересекающимися считаются отрезки, имеющие хотя бы одну общую точку. То есть отрезки, имеющие одинаковый конец пересекаются. Например, на картинке отрезки, заданные точками [(0, 2), (1, 5)] и [(0, 4), (1, 5)] считаются пересекающимися.
 
-![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Intersecting_segments/segments.png)
+![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Intersecting_segments/Images/segments.png)
 
 
 
