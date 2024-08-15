@@ -2,7 +2,7 @@
 
 Даны два массива a и b длины N из натуральных чисел. Рассмотрим множестве, состоящее из отрезков, соединяющих точки (0, a_i) и (1, b_i) для 1 <= i <= N. Найдите количество отрезков этого множества, которые не пересекаются с другими отрезками.
 
-![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Intersecting_segments/Images/segments.png)
+![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Intersecting_segments(ver.2)/Images/problem_segments.png)
 ### Формат ввода
 В первой строке ввода находится единственное число N (1 <= N <= 3 * 10^5) - количество отрезков.
 
