@@ -4,4 +4,6 @@
 
 ![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Intersecting_segments(ver.2)/Images/example_segments.jpg)
 
+Известно, что любая перестановка из n элементов раскладывается в некоторый набор *циклов*. Например, в случае, описанном на картинке, перестановка **`s`** распалась на 4 цикла: {1, 2, 4} ; {3} ; {5} ; {6, 7}.
+
 ![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Intersecting_segments(ver.2)/Images/cycles_segments.jpg)
