@@ -20,7 +20,7 @@ private:
     bool has_the_only_child(int index);
 
     bool has_children(int index);
-
+    
     void sift_down(int start_index);
 
     void sift_up(int index);
@@ -30,12 +30,10 @@ public:
 
     void build_pyramid();
 
-    void pyramid_sort();
-
     const std::vector<T>& get_vector() const;
 
     void print() const;
-
+    
     int get_size() const;
 
     void extract_root();
@@ -126,17 +124,6 @@ void Pyramid<T, Comparator>::build_pyramid() {
     for (int i = 1; i < size; ++i) {
         sift_up(i);
     }
-}
-
-
-template <typename T, typename Comparator>
-void Pyramid<T, Comparator>::pyramid_sort() {
-    for (int i = 0; i < array.size(); ++i) {
-        std::swap(array[size - 1], array[0]);
-        --size;
-        sift_down(0);
-    }
-    size = array.size();
 }
 
 
