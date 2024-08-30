@@ -49,7 +49,8 @@ private:
 public:
     KMP(const std::string& text, const std::string& sub_text) : prefix_function(sub_text), text(text), sub_text(sub_text) {}
     
-    int find_sub_text() {
+    std::vector<int> find_sub_text() {
+        std::vector<int> answer;
         int compare_index = 0;
         int j = 0;
         bool found = false;
@@ -62,7 +63,9 @@ public:
                 ++compare_index;
                 ++k;
                 if (k == sub_text.size()) {
-                    return j - k;
+                    answer.push_back(j - k);
+                    k = prefix_function.get_value(k);
+                    compare_index = k;
                 }
             } else {
                 if (k == 0) {
@@ -72,16 +75,24 @@ public:
                 compare_index = k;
             }
         }
-        return -1;
+        return answer;
     }
 };
 
 
 int main() {
-    //std::string text = "abacabaz abacabax abacabam";
-    //std::string p = "abacabaxx";
     std::cin >> text >> p;
     KMP kmp(text, p);
-    std::cout << kmp.find_sub_text();
+    std::vector<int> answer = kmp.find_sub_text();
+    if (answer.size() != 0) {
+        for (int val : answer) {
+            std::cout << val << ' ';
+        }
+    } else {
+        std::cout << -1;
+    }
     return 0;
 }
+
+
+
