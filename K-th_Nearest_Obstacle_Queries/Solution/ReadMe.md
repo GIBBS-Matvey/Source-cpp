@@ -14,10 +14,10 @@ Note that initially there are no obstacles anywhere.
 The distance of an obstacle at coordinate $(x, y)$ from the origin is given by $|x| + |y|$.
 
  
-`Input: queries = [[1,2],[3,4],[2,3],[-3,0]]
+``Input: queries = [[1,2],[3,4],[2,3],[-3,0]]
 k = 2
 
-Output: [-1,7,5,3]`
+Output: [-1,7,5,3]``
 Explanation:
 
 ● Initially, there are 0 obstacles.
@@ -30,10 +30,10 @@ Explanation:
 
 ● After queries[3], there are obstacles at distances 3, 3, 5, and 7.
 
-`Input: queries = [[5,5],[4,4],[3,3]]
+``Input: queries = [[5,5],[4,4],[3,3]]
 k = 1
 
-Output: [10,8,6]`
+Output: [10,8,6]``
 
 Explanation:
 
