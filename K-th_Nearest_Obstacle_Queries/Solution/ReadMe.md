@@ -4,8 +4,8 @@ There is an infinite 2D plane.
 
 You are given a positive integer `K`. You are also given a 2D array queries, which contains the following queries:
 
-queries[i] = [x, y]: Build an obstacle at coordinate (x, y) i
-After each query, you need to find the distance of the kth nearest obstacle from the origin.
+`queries[i] = [x, y]`: Build an obstacle at coordinate (x, y).
+After each query, you need to find the distance of the $k^{th}$ nearest obstacle from the origin.
 
 Return an integer array results where results[i] denotes the kth nearest obstacle after query i, or results[i] == -1 if there are less than k obstacles.
 
