@@ -2,7 +2,7 @@
 
 There is an infinite 2D plane.
 
-You are given a positive integer K. You are also given a 2D array queries, which contains the following queries:
+You are given a positive integer `K`. You are also given a 2D array queries, which contains the following queries:
 
 queries[i] = [x, y]: Build an obstacle at coordinate (x, y) i
 After each query, you need to find the distance of the kth nearest obstacle from the origin.
