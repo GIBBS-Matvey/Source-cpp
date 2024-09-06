@@ -45,7 +45,7 @@ k = 1``
 ● After queries[2], there are obstacles at distances 6, 8, and 10.
  
 
-#### **Constraints:**
+### **Constraints:**
 
 $1 \leq queries.length \leq 2 \cdot 10^{5}$
 All queries[i] are unique.
