@@ -32,9 +32,9 @@ k = 2``
 ● After queries[3], there are obstacles at distances 3, 3, 5, and 7.
 
 ``Input: queries = [[5,5],[4,4],[3,3]]
-k = 1
+k = 1``
 
-Output: [10,8,6]``
+``Output: [10,8,6]``
 
 **Explanation:**
 
@@ -50,7 +50,7 @@ Output: [10,8,6]``
 $1 \leq queries.length \leq 2 \cdot 10^{5}$
 All queries[i] are unique.
 
-$-10^{9} \leq queries[i][0]\text{ } queries[i][1] \leq 10^{9}\text{ ; }$
+$-10^{9} \leq queries[i][0]\text{, } queries[i][1] \leq 10^{9}\text{ ; }$
 $1 \leq k \leq 10^{5}.$
 
 
