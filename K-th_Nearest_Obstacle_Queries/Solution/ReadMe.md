@@ -14,38 +14,43 @@ Note that initially there are no obstacles anywhere.
 The distance of an obstacle at coordinate $(x, y)$ from the origin is given by $|x| + |y|$.
 
  
-``Input: queries = [[1,2],[3,4],[2,3],[-3,0]]
-k = 2``
+`Input: queries = [[1,2],[3,4],[2,3],[-3,0]]
+k = 2
 
-Output: [-1,7,5,3]
+Output: [-1,7,5,3]`
 Explanation:
 
 ● Initially, there are 0 obstacles.
+
 ● After queries[0], there are less than 2 obstacles.
+
 ● After queries[1], there are obstacles at distances 3 and 7.
+
 ● After queries[2], there are obstacles at distances 3, 5, and 7.
+
 ● After queries[3], there are obstacles at distances 3, 3, 5, and 7.
 
-Input: queries = [[5,5],[4,4],[3,3]]
+`Input: queries = [[5,5],[4,4],[3,3]]
 k = 1
 
-Output: [10,8,6]
+Output: [10,8,6]`
+
 Explanation:
 
 ● After queries[0], there is an obstacle at distance 10.
+
 ● After queries[1], there are obstacles at distances 8 and 10.
+
 ● After queries[2], there are obstacles at distances 6, 8, and 10.
  
 
-Constraints:
+#### **Constraints:**
 
-1 <= queries.length <= 2 * 10⁵
+$1 \leq queries.length \leq 2 \cdot 10^{5}$
 All queries[i] are unique.
 
--10⁹ <= queries[i][0], queries[i][1] <= 10⁹
-1 <= k <= 10⁵.
-➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖
+$-10^{9} \leq queries[i][0], queries[i][1] \leq 10^{9}$
+$1 \leq k \leq 10^{5}.$
 
 
-Решение за O(nlg(k)):
-https://github.com/GIBBS-Matvey/Source-cpp/tree/master/K-th_Nearest_Obstacle_Queries/Solution
+
