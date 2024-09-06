@@ -18,7 +18,8 @@ The distance of an obstacle at coordinate $(x, y)$ from the origin is given by $
 k = 2``
 
 ``Output: [-1,7,5,3]``
-Explanation:
+
+**Explanation:**
 
 ● Initially, there are 0 obstacles.
 
@@ -35,7 +36,7 @@ k = 1
 
 Output: [10,8,6]``
 
-Explanation:
+**Explanation:**
 
 ● After queries[0], there is an obstacle at distance 10.
 
@@ -49,7 +50,7 @@ Explanation:
 $1 \leq queries.length \leq 2 \cdot 10^{5}$
 All queries[i] are unique.
 
-$-10^{9} \leq queries[i][0], queries[i][1] \leq 10^{9}$
+$-10^{9} \leq queries[i][0]\text{ } queries[i][1] \leq 10^{9}\text{ ; }$
 $1 \leq k \leq 10^{5}.$
 
 
