@@ -1,5 +1,5 @@
-⭐️Задача "K-th Nearest Obstacle Queries".
-➖➖➖➖➖➖➖➖➖➖➖➖
+### Задача "K-th Nearest Obstacle Queries".
+
 There is an infinite 2D plane.
 
 You are given a positive integer K. You are also given a 2D array queries, which contains the following queries:
