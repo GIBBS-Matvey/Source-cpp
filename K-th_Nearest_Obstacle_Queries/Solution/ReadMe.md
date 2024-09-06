@@ -11,11 +11,11 @@ Return an integer array results where $results[i]$ denotes the $k^{th}$ nearest 
 
 Note that initially there are no obstacles anywhere.
 
-The distance of an obstacle at coordinate (x, y) from the origin is given by |x| + |y|.
+The distance of an obstacle at coordinate $(x, y)$ from the origin is given by $|x| + |y|$.
 
  
-Input: queries = [[1,2],[3,4],[2,3],[-3,0]]
-k = 2
+``Input: queries = [[1,2],[3,4],[2,3],[-3,0]]
+k = 2``
 
 Output: [-1,7,5,3]
 Explanation:
