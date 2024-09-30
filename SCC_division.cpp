@@ -87,18 +87,7 @@ public:
         answer.push_front(vertex);
     }
 
-    void SCC_found(const int vertex, std::vector<int>& answer) {
-        colors[vertex] = "Gray";
-        for (const auto& edge : adj[vertex]) {
-            if (colors[edge.to] == "White") {
-                SCC_found(edge.to, answer);
-            }
-        }
-        colors[vertex] = "Black";
-        answer.push_back(vertex);
-    }
-
-    std::vector<std::vector<int>> Kosaraju() {
+    /*std::vector<std::vector<int>> Kosaraju() {
         std::forward_list<int> sortedVertexes = this->TopSort();
         Graph newGraph = this->GetTransposed();
         std::vector<std::vector<int>> scc;
@@ -112,6 +101,32 @@ public:
         }
         scc.shrink_to_fit();
         return scc;
+    }*/
+
+    std::pair<int, std::vector<int>> Kosaraju() {
+        std::forward_list<int> sortedVertexes = this->TopSort();
+        Graph newGraph = this->GetTransposed();
+        size_t num = 1;
+
+        std::vector<int> answer(vertex_number);
+        for (const auto& vertex : sortedVertexes) {
+            if (newGraph.colors[vertex] == "White") {
+                newGraph.SCC_found(vertex, answer , num);
+                ++num;
+            }
+        }
+        return {num - 1, answer};
+    }
+
+    void SCC_found(const int vertex, std::vector<int>& answer, int scc_index) {
+        colors[vertex] = "Gray";
+        for (const auto& edge : adj[vertex]) {
+            if (colors[edge.to] == "White") {
+                SCC_found(edge.to, answer, scc_index);
+            }
+        }
+        colors[vertex] = "Black";
+        answer[vertex] = scc_index;
     }
 
     void PrintAdj() {
@@ -137,18 +152,14 @@ int main() {
     for (size_t i = 0; i < edge_number; ++i) {
         int from, to;
         std::cin >> from >> to;
-        graph.AddEdge(from, to);
+        graph.AddEdge(from - 1, to - 1);
     }
 
-    std::vector<std::vector<int>> answer = graph.Kosaraju();
-
-    for (const auto& scc : answer) {
-        for (const auto &val : scc) {
-            std::cout << val << ' ';
-        }
-        std::cout << std::endl;
+    std::pair<int, std::vector<int>> answer = graph.Kosaraju();
+    std::cout << answer.first << '\n';
+    for (const auto& scc_num : answer.second) {
+        std::cout << scc_num << ' ';
     }
-
+    
     return 0;
 }
-
