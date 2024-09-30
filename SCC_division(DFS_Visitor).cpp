@@ -1,147 +1,160 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
+#include <forward_list>
+#include <string>
 
 
 class Visitor {
+protected:
+    std::vector<int> v_call_order;
+    std::vector<std::string> color;
+    int vertex_number;
 public:
-    void initVertex(int v) {}
 
-    void startVertex(int v) {}
-
-    void discoverVertex(int v) {}
-
-    void finishVertex(int v) {}
-};
-
-
-class TopSortVisitor : public Visitor {
-private:
-    std::vector<int>* callVectorPtr;
-public:
-    explicit TopSortVisitor(std::vector<int>* callVectorPtr) : callVectorPtr(callVectorPtr) {}
-
-    void finishVertex(int v) {
-        callVectorPtr->emplace_back(v);
-    }
-};
-
-
-class StrongComponentVisitor : public Visitor {
-private:
-    std::vector<std::vector<int>>* strongComponentsPtr;
-    int curIndex;
-    int* strongComponentNumber;
-
-public:
-    StrongComponentVisitor(std::vector<std::vector<int>>* strongComponentsPtr, int* sccNumber) : curIndex(-1), strongComponentNumber(sccNumber),
-    strongComponentsPtr(strongComponentsPtr) {}
-
-    void startVertex(int v) {
-        ++(*strongComponentNumber);
-        ++curIndex;
+    Visitor(int v_number) : vertex_number(v_number), color(v_number, "white") {
+        v_call_order.reserve(v_number);
+        for (int i = 0; i < v_number; ++i) {
+            v_call_order.push_back(i);
+        }
     }
 
-    void discoverVertex(int v) {
-        (*strongComponentsPtr)[curIndex].push_back(v + 1);
+    const std::vector<int>& get_order_vector() {
+        return v_call_order;
+    }
+
+    const std::string& get_color(int v) {
+        return color[v];
+    }
+
+    void start_vertex(int v) {}
+
+    void discover_vertex(int v) {
+        color[v] = "gray";
+    }
+
+    void finish_vertex(int v) {
+        color[v] = "black";
     }
 };
 
 
-class Graph {
+
+class Top_sort_visitor : public Visitor {
 private:
-    struct Edge {
-        int to;
-    };
-    std::vector<std::vector<Edge>> adj;
-    size_t vNumber;
-
+    std::forward_list<int> sorted_v;
 public:
-    explicit Graph(size_t vNumber) : vNumber(vNumber), adj(vNumber) {}
+    Top_sort_visitor(int v_number) : Visitor(v_number) {}
 
-    void addAdj(int from, int to) {
-        adj[from].push_back({to});
-        adj[to].push_back({from});
+    void discover_vertex(int v) {
+        color[v] = "gray";
     }
 
-    template <class Visitor>
-            void Dfs(Visitor vis, std::vector<std::string>& color, const std::vector<int>& callOrderV = std::vector<int>()) {
+    void finish_vertex(int v) {
+        sorted_v.push_front(v);
+        color[v] = "black";
+    }
 
-        std::vector<int> callOrderVector(vNumber);
-        
-        if (!callOrderV.empty()) {
-            for (auto v : callOrderV) {
-                callOrderVector.emplace_back(v);
-            }
-        } else {
-            for (int v = 0; v < vNumber; ++v) {
-                callOrderVector.emplace_back(v);
-            }
+    std::forward_list<int> get_sorted_v() {
+        return sorted_v;
+    }
+};
+
+
+
+class Scc_visitor : public Visitor {
+private:
+    std::vector<int> scc;
+    int cur_scc;
+    
+public:
+    Scc_visitor(int v_number, std::vector<int>& call_order) : Visitor(v_number), scc(v_number) {
+        for (int i = 0; i < v_number; ++i) {
+            v_call_order[i] = call_order[i];
         }
+        cur_scc = -1;
+    }
 
-        for (auto v : callOrderVector) {
-            color[v] = "white";
-            vis.initVertex(v);
-        }
+    void start_vertex(int v) {
+        ++cur_scc;
+    }
 
-        for (auto v : callOrderVector) {
-            if (color[v] == "white") {
-                vis.startVertex(v);
-                DfsVisit(v, vis, color);
+    void discover_vertex(int v) {
+        color[v] = "gray";
+        scc[v] = cur_scc;
+    }
+
+    void finish_vertex(int v) {
+        color[v] = "black";
+    }
+
+    std::pair<int, std::vector<int>> get_kosaraju_pair() const {
+        return {cur_scc + 1, scc};
+    }
+};
+
+
+
+class Graph_ {
+private:
+    std::vector<std::vector<int>> adj;
+    int vertex_number;
+public:
+    Graph_(int v_number) : vertex_number(v_number), adj(v_number, std::vector<int>()) {}
+
+    void add_edge(int from, int to) {
+        adj[from].push_back(to);
+    }
+
+    template<typename Visitor>
+    void dfs(Visitor& vis) {
+        for (int v : vis.get_order_vector()) {
+            if (vis.get_color(v) == "white") {
+                vis.start_vertex(v);
+                dfs_visit(v, vis);
             }
         }
     }
 
-    template<class Visitor>
-            void DfsVisit(int current, Visitor vis, std::vector<std::string>& color) {
-        color[current] = "gray";
-        vis.discoverVertex(current);
-        for (auto neiEdge : adj[current]) {
-            if (color[neiEdge.to] == "white") {
-                DfsVisit(neiEdge.to, vis, color);
+    template<typename Visitor>
+    void dfs_visit(int vertex, Visitor& visitor) {
+        visitor.discover_vertex(vertex);
+        for (int nei : adj[vertex]) {
+            if (visitor.get_color(nei) == "white") {
+                dfs_visit(nei, visitor);
             }
         }
-        color[current] = "black";
-        vis.finishVertex(current);
+        visitor.finish_vertex(vertex);
     }
 
-    Graph getTransposed() const {
-        Graph trGraph(vNumber);
-        for (int from = 0; from < vNumber; ++from) {
-            for (auto& neiEdge : adj[from]) {
-                trGraph.addAdj(neiEdge.to, from);
+    std::vector<int> top_sort() {
+        Top_sort_visitor top_sort_vis(vertex_number);
+        dfs<Top_sort_visitor>(top_sort_vis);
+
+        std::vector<int> sorted_v;
+        sorted_v.reserve(vertex_number);
+        for (int v : top_sort_vis.get_sorted_v()) {
+            sorted_v.push_back(v);
+        }
+        return sorted_v;
+    }
+
+    Graph_ get_transposed() const {
+        Graph_ trans_graph(vertex_number);
+        for (int i = 0; i < vertex_number; ++i) {
+            for (int nei : adj[i]) {
+                trans_graph.add_edge(nei, i);
             }
         }
-        return trGraph;
+        return trans_graph;
     }
 
-    void FindStrongComponents() {
-
-        std::vector<std::string> color(vNumber);
-        std::vector<int> callVector(vNumber);
-        TopSortVisitor sortVisitor(&callVector);
-
-        Dfs(sortVisitor, color);
-        std::reverse(callVector.begin(), callVector.end());
-
-        int strongComponentNumber = 0;
-        std::vector<std::vector<int>> strongComponent(vNumber);
-        StrongComponentVisitor sccVisitor(&strongComponent, &strongComponentNumber);
-        
-        getTransposed().Dfs(sccVisitor, color, callVector);
-
-        std::cout << strongComponentNumber << std::endl;
-        for (const auto& scc : strongComponent) {
-            if (scc.empty()) {
-                break;
-            }
-            std::cout << scc.size() << '\n';
-            for (auto v : scc) {
-                std::cout << v << ' ';
-            }
-            std::cout << '\n';
-        }
+    std::pair<int, std::vector<int>> Kosaraju() {
+        std::vector<int> sorted_vertexes = top_sort();
+        Scc_visitor scc_visitor(vertex_number, sorted_vertexes);
+        get_transposed().dfs<Scc_visitor>(scc_visitor);
+        return scc_visitor.get_kosaraju_pair();
     }
+
 };
 
 
@@ -152,15 +165,19 @@ int main() {
     size_t edge_number;
     std::cin >> edge_number;
 
-    Graph graph(vertex_number);
+    Graph_ graph(vertex_number);
 
     for (size_t i = 0; i < edge_number; ++i) {
         int from, to;
         std::cin >> from >> to;
-        graph.addAdj(from - 1, to - 1);
+        graph.add_edge(from - 1, to - 1);
     }
 
-    graph.FindStrongComponents();
-
+    std::pair<int, std::vector<int>> kos_pair = graph.Kosaraju();
+    std::cout << kos_pair.first << '\n';
+    for (int scc_num : kos_pair.second) {
+        std::cout << scc_num + 1 << ' ';
+    }
+    
     return 0;
 }
