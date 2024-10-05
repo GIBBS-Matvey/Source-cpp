@@ -5,7 +5,7 @@ class Z_function {
 private:
     std::vector<int> z_fun;
     int index_max_block;
-    
+
     int find_len(const std::string& text, int first_index, int second_index) {
         int len = 0;
         for (int i = 0; second_index + i < text.size(); ++i) {
@@ -17,21 +17,21 @@ private:
         }
         return len;
     }
-    
-    
+
+
 public:
     Z_function(const std::string& text) : z_fun(text.size()) {
-        
+
         z_fun[0] = text.size();
         z_fun[1] = find_len(text, 0, 1);
         index_max_block = 1;
-        
+
         for (int i = 2; i < text.size(); ++i) {
             int k = i - index_max_block;
             int l = z_fun[index_max_block] - k;
             if (z_fun[k] < l) { // no update the rightest block
                 z_fun[i] = z_fun[k];
-            } else { // use len of the rightest block 
+            } else { // use len of the rightest block
                 if (l < 0) {
                     z_fun[i] = find_len(text, 0, i);
                 } else {
@@ -41,15 +41,19 @@ public:
             }
         }
     }
-    
+
+    int operator[](int i) const {
+        return z_fun[i];
+    }
+
+    int size() const {
+        return z_fun.size();
+    }
+
     void print() const {
         for (int val : z_fun) {
             std::cout << val << ' ';
         }
-    }
-    
-    const std::vector<int>& get_function() const {
-        return z_fun;    
     }
 };
 
@@ -57,18 +61,16 @@ public:
 
 class Solution {
 private:
-    std::string text;
     std::string sub_text;
     Z_function z_fun;
-    
+
 public:
-    Solution(const std::string& text, const std::string& sub_text) : z_fun(sub_text + '$' + text), 
-                                                                    text(text), sub_text(sub_text) {}
-                                                                    
+    Solution(const std::string& text, const std::string& sub_text) : z_fun(sub_text + '$' + text), sub_text(sub_text) {}
+
     void print_answer() const {
-        for (int i = 0; i < z_fun.get_function().size(); ++i) {
-            if (z_fun.get_function()[i] == sub_text.size()) {
-                std::cout << i - 1 - sub_text.size() << ' '; 
+        for (int i = 0; i < z_fun.size(); ++i) {
+            if (z_fun[i] == sub_text.size()) {
+                std::cout << i - 1 - sub_text.size() << ' ';
             }
         }
     }
