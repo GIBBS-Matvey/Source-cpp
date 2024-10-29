@@ -1,81 +1,183 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
+#include <map>
+#include <queue>
 
+/*#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>*/
+
+struct Request {
+    char type;
+    char symbol;
+    Request(char type, char symbol = '$') : type(type), symbol(symbol) {}
+};
+
+
+class Bor {
+private:
+    struct Node {
+        std::map<char, Node*> map;
+        Node* parent;
+        char symbol;
+        int max_val;
+        int index;
+        
+        Node(char symbol, Node* parent, int max, int index) : symbol(symbol), parent(parent), max_val(max), index(index) {}
+    };
+    
+    Node* root;
+    
+public:
+
+    Bor() : root(nullptr) {}
+    
+    void push_word(const std::string& word, std::size_t popularity, int index) {
+        if (root == nullptr) {
+            Node* new_node = new Node('$', nullptr, 0, -1);
+            root = new_node;
+        }
+        
+        Node* tmp = root;
+        for (int i = 0; i < word.size(); ++i) {
+            
+            auto it = tmp->map.find(word[i]);
+            
+            if (it != tmp->map.end()) {
+                tmp = it->second;
+                if (popularity > tmp->max_val) {
+                    tmp->max_val = popularity;
+                    tmp->index = index;
+                }
+            } else {
+                Node* new_node = new Node(word[i], tmp, popularity, index);
+                tmp->map.insert({word[i], new_node});
+                tmp = new_node;
+            }
+        }
+    }
+    
+    void print_bfs() const {
+        if (root != nullptr) {
+            std::queue<Node*> q;
+            q.push(root);
+            
+            while (!q.empty()) {
+                Node* tmp = q.front();
+                std::cout << tmp->symbol << ' ';
+                q.pop();
+                for (const auto& pair : tmp->map) {
+                    q.push(pair.second);
+                }
+            }
+        }
+    }
+    
+    void print_dfs(Node* tmp) const {
+        std::cout << tmp->symbol << ' ' << tmp->max_val << ' ' << tmp->index + 1 << '\n';
+        for (const auto& pair : tmp->map) {
+            print_dfs(pair.second);
+        }
+    }
+    
+    Node* get_root() {
+        return root;
+    }
+    
+    void process_reqs(const std::vector<Request>& v_req) {
+        if (!v_req.empty()) {
+            Node* tmp = root;
+            for (const auto& request : v_req) {
+                if (request.type == '+') {
+                    auto it = tmp->map.find(request.symbol);
+                    if (it != tmp->map.end()) {
+                        tmp = it->second;
+                        std::cout << tmp->index + 1 << '\n';
+                    }
+                } else {
+                    tmp = tmp->parent;
+                    std::cout << tmp->index + 1 << '\n';
+                }
+            }
+        }
+    }
+    
+    
+    ~Bor() {
+        if (root != nullptr) {
+            std::queue<Node*> q;
+            q.push(root);
+            Node* tmp;
+            while(!q.empty()) {
+                tmp = q.front();
+                q.pop();
+                for (const auto& pair : tmp->map) {
+                    q.push(pair.second);
+                }
+                delete tmp;
+            }
+        }
+    }
+    
+};
 
 
 class Solution {
 private:
-    struct Word {
-        std::string word;
-        int popularity;
-        int index;
-
-        Word(const std::string& word, int popularity, int index) : word(word), popularity(popularity), index(index) {}
-    };
-
-    static bool compare(const Word& w1, const Word& w2) {
-        return w1.word < w2.word;
-    }
-
-    std::vector<Word> v;
-
+    Bor bor;
 public:
 
-    Solution(std::vector<std::string>& v_words, std::vector<int>& v_popular) {
-        v.reserve(v_words.size());
-        for (int i = 0; i < v_words.size(); ++i) {
-            v.push_back({v_words[i], v_popular[i], i});
-        }
-
-        std::make_heap(v.begin(), v.end(), compare);
-        std::sort_heap(v.begin(), v.end(), compare);
-
-
-    }
-
-    void print() const {
-        for (auto& word : v) {
-            std::cout << word.word << ", " << word.popularity << ", " << word.index << '\n';
+    Solution(const std::vector<std::pair<std::string, std::size_t>>& v_word) {
+        for (int i = 0; i < v_word.size(); ++i) {
+            bor.push_word(v_word[i].first, v_word[i].second, i);
         }
     }
-
-    int process_request(const std::string& word) {
-        return 0;
+    
+    void process_reqs(const std::vector<Request>& v_req) {
+        bor.process_reqs(v_req);
     }
+    
 };
 
 
+
+
+
 int main() {
-    int N, Q;
-    std::cin >> N >> Q;
-    std::vector<std::string> v_words;
-    std::vector<int> v_popular;
-
-    v_words.resize(N);
-    v_popular.resize(N);
-
-    for (int i = 0; i < N; ++i) {
-        std::cin >> v_words[i] >> v_popular[i];
+    /*Bor bor;
+    bor.push_word("yandex", 10, 0);
+    bor.push_word("yacht", 1, 1);
+    bor.push_word("yoghurt", 15, 2);
+    bor.print_dfs(bor.get_root());*/
+    
+    std::vector<std::pair<std::string, std::size_t>> v_word;
+    int n, req_number;
+    std::cin >> n >> req_number;
+    
+    v_word.reserve(n);
+    
+    
+    std::string word;
+    std::size_t popularity;
+    for (int i = 0; i < n; ++i) {
+        std::cin >> word >> popularity;
+        v_word.push_back({word, popularity});
     }
-
-    Solution solution(v_words, v_popular);
-    solution.print();
-
-    /*char symbol, operation;
-    std::string cur_word;
-
-    for (int i = 0; i < Q; ++i) {
-        std::cin >> operation;
-        if (operation == '+') {
+    
+    std::vector<Request> v_req;
+    v_req.reserve(req_number);
+    char type, symbol;
+    for (int i = 0; i < req_number; ++i) {
+        std::cin >> type;
+        if (type == '+') {
             std::cin >> symbol;
-            cur_word += symbol;
-        } else {
-            cur_word.pop_back();
         }
-        solution.process_request(cur_word);
-    }*/
-
-
-    return 0;
+        v_req.push_back({type, symbol});
+    }
+    
+    Solution solution(v_word);
+    solution.process_reqs(v_req);
+    
+    //_CrtDumpMemoryLeaks();
+    return 0; 
 }
