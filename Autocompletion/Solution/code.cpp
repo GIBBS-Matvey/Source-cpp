@@ -3,6 +3,7 @@
 #include <map>
 #include <queue>
 
+
 struct Request {
     char type;
     char symbol;
@@ -18,27 +19,24 @@ private:
         char symbol;
         int max_val;
         int index;
-        
+
         Node(char symbol, Node* parent, int max, int index) : symbol(symbol), parent(parent), max_val(max), index(index) {}
     };
-    
-    Node* root;
-    
-public:
 
+    Node* root;
+
+public:
     Bor() : root(nullptr) {}
-    
+
     void push_word(const std::string& word, std::size_t popularity, int index) {
         if (root == nullptr) {
             Node* new_node = new Node('$', nullptr, 0, -1);
             root = new_node;
         }
-        
+
         Node* tmp = root;
         for (int i = 0; i < word.size(); ++i) {
-            
             auto it = tmp->map.find(word[i]);
-            
             if (it != tmp->map.end()) {
                 tmp = it->second;
                 if (popularity > tmp->max_val) {
@@ -52,34 +50,7 @@ public:
             }
         }
     }
-    
-    void print_bfs() const {
-        if (root != nullptr) {
-            std::queue<Node*> q;
-            q.push(root);
-            
-            while (!q.empty()) {
-                Node* tmp = q.front();
-                std::cout << tmp->symbol << ' ';
-                q.pop();
-                for (const auto& pair : tmp->map) {
-                    q.push(pair.second);
-                }
-            }
-        }
-    }
-    
-    void print_dfs(Node* tmp) const {
-        std::cout << tmp->symbol << ' ' << tmp->max_val << ' ' << tmp->index + 1 << '\n';
-        for (const auto& pair : tmp->map) {
-            print_dfs(pair.second);
-        }
-    }
-    
-    Node* get_root() {
-        return root;
-    }
-    
+
     void process_reqs(const std::vector<Request>& v_req) {
         if (!v_req.empty()) {
             Node* tmp = root;
@@ -89,6 +60,8 @@ public:
                     if (it != tmp->map.end()) {
                         tmp = it->second;
                         std::cout << tmp->index + 1 << '\n';
+                    } else {
+                        std::cout << -1 << '\n';
                     }
                 } else {
                     tmp = tmp->parent;
@@ -97,8 +70,7 @@ public:
             }
         }
     }
-    
-    
+
     ~Bor() {
         if (root != nullptr) {
             std::queue<Node*> q;
@@ -114,52 +86,40 @@ public:
             }
         }
     }
-    
 };
 
 
 class Solution {
 private:
     Bor bor;
-public:
 
+public:
     Solution(const std::vector<std::pair<std::string, std::size_t>>& v_word) {
         for (int i = 0; i < v_word.size(); ++i) {
             bor.push_word(v_word[i].first, v_word[i].second, i);
         }
     }
-    
+
     void process_reqs(const std::vector<Request>& v_req) {
         bor.process_reqs(v_req);
     }
-    
 };
 
 
-
-
-
 int main() {
-    /*Bor bor;
-    bor.push_word("yandex", 10, 0);
-    bor.push_word("yacht", 1, 1);
-    bor.push_word("yoghurt", 15, 2);
-    bor.print_dfs(bor.get_root());*/
-    
     std::vector<std::pair<std::string, std::size_t>> v_word;
     int n, req_number;
     std::cin >> n >> req_number;
-    
+
     v_word.reserve(n);
-    
-    
+
     std::string word;
     std::size_t popularity;
     for (int i = 0; i < n; ++i) {
         std::cin >> word >> popularity;
         v_word.push_back({word, popularity});
     }
-    
+
     std::vector<Request> v_req;
     v_req.reserve(req_number);
     char type, symbol;
@@ -170,10 +130,8 @@ int main() {
         }
         v_req.push_back({type, symbol});
     }
-    
+
     Solution solution(v_word);
     solution.process_reqs(v_req);
-    
-    //_CrtDumpMemoryLeaks();
-    return 0; 
+    return 0;
 }
