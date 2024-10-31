@@ -51,5 +51,5 @@ $w_{i}$ $(1 ≤ |w_{i}| ≤ 10^{6})$ и целое число $p_{i}$ $(0 \leq p
 | + o           |                 |
 
 ##### Пояснение к тесту:
-![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Autocompletion_hard/Images/Autocompletion_explanation.png)
+![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Autocompletion/Images/Autocompletion_explanation.png)
 
