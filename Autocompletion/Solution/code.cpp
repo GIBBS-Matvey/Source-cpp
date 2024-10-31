@@ -3,10 +3,6 @@
 #include <map>
 #include <queue>
 
-/*#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>*/
-
 struct Request {
     char type;
     char symbol;
