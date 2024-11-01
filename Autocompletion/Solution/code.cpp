@@ -35,6 +35,9 @@ public:
         }
 
         Node* tmp = root;
+        if (popularity > tmp->max_val) {
+            tmp->max_val = popularity;
+        }    
         for (int i = 0; i < word.size(); ++i) {
             auto it = tmp->map.find(word[i]);
             if (it != tmp->map.end()) {
