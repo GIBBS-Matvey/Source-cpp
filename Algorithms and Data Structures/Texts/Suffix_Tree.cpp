@@ -5,7 +5,8 @@ class Suffix_Tree {
 private:
 
     struct Node;
-
+    struct Location;
+    
     struct Edge {
         int start;
         int finish;
@@ -29,21 +30,53 @@ private:
         int delta_start;
         int delta_finish;
 
-        const Node* const root;
+        Node* root;
         const std::string& text;
 
         Location(Node* expl_parent, int delta_start, int delta_finish,
-                 const Node* const root, const std::string& text) : expl_parent(expl_parent), root(root), text(text),
-                 delta_start(delta_start), delta_finish(delta_finish){}
-
+                 Node* root, const std::string& text) : expl_parent(expl_parent), root(root), text(text),
+                 delta_start(delta_start), delta_finish(delta_finish) {}
+                 
+                 
         void move_suffix_link() {
-            //todo
+            // гарантировано не вызываем от корня
+
+            if (is_explicit()) {
+                expl_parent = expl_parent->suffix_link;
+            }
+            else {
+                if (expl_parent == root) {
+                    this->skip_count(expl_parent, delta_start + 1, delta_finish);
+                }
+                else {
+                    this->skip_count(expl_parent->suffix_link, delta_start, delta_finish);
+                }
+            }
+        }
+        
+        Location skip_count(Node* node, int start, int finish) {
+            // гарантированно спускаемся в неявную нелистовую локацию, которая гарантированно отчитается от этого места
+
+            int cur_len = finish - start + 1;
+            int cur_start = start;
+            const Edge* cur_edge = &(node->map.find(text[cur_start])->second);
+
+            while (cur_len > cur_edge->get_len()) {
+                node = cur_edge->to;
+                cur_start += cur_edge->get_len();
+                cur_len -= cur_edge->get_len();
+                cur_edge = &(node->map.find(text[cur_start])->second);
+            }
+            
+            this->expl_parent = node;
+            this->delta_start = cur_edge->start;
+            this->delta_finish = cur_edge->start + cur_len - 1;
         }
 
         bool is_root() const {
             return expl_parent == root && delta_start == -1;
         }
-
+        
         bool is_leaf() const {
             if (!is_explicit()) {
                 auto it = expl_parent->map.find(text[delta_start]);
@@ -61,9 +94,6 @@ private:
             return delta_start == -1;
         }
 
-
-
-
         bool has_symbol_after(char symbol) {
             // точно вызвали функцию не от листовой вершины
             if (is_explicit()) {
@@ -73,8 +103,6 @@ private:
                 return text[delta_finish + 1] == symbol;
             }
         }
-
-
 
         void add_symbol(char symbol, int i) {
             if (is_explicit()) {
@@ -95,9 +123,10 @@ private:
                 //todo посчитать suffix_link для new_node
             }
         }
-
+        
         void move_down(char symbol) {
             // точно знаем, что symbol есть в продолжении текущей локации
+            
             const Edge& edge = expl_parent->map.find(symbol)->second;
             if (is_explicit()) {
                 if (edge.get_len() > 1 || (edge.get_len() == 1 && edge.to == nullptr)) {
