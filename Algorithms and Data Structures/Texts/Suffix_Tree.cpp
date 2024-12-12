@@ -37,42 +37,7 @@ private:
                  delta_start(delta_start), delta_finish(delta_finish){}
 
         void move_suffix_link() {
-            if (is_explicit()) {
-                expl_parent = expl_parent->suffix_link;
-            }
-            else {
-                char start_symbol;
-                int cur_delta_start, cur_delta_len;
-
-                if (expl_parent != root) {
-                    expl_parent = expl_parent->suffix_link;
-                    cur_delta_start = delta_start;  // индекс первого символа cur_delta
-                    cur_delta_len = delta_len();    // текущая delta, которую надо отчитать
-                } else {
-                    cur_delta_start = delta_start + 1;  // если стоим в корне, тогда надо от корня отчитать строку на один символ короче
-                    cur_delta_len = delta_len() - 1;
-                }
-
-                while (cur_delta_len > 0) { // пока есть что читать, оно точно прочитается
-
-                    start_symbol = text[cur_delta_start];
-                    auto it_edge = expl_parent->map.find(start_symbol);
-                    const Edge& cur_edge = it_edge->second;
-
-                    if (cur_edge.get_len() < cur_delta_len) {
-                        cur_delta_start += cur_edge.get_len();
-                        cur_delta_len -= cur_edge.get_len();
-                        expl_parent = cur_edge.to;
-                    }
-
-                    else if (cur_edge.get_len() >= cur_delta_len) { // случай равенства означает, что мы в листе (важно ли?)
-                        break;
-                    }
-                }
-
-                delta_start = cur_delta_start;
-                delta_finish = delta_start + cur_delta_len - 1; // надо ли в принципе хранить? upd: да
-            }
+            //todo
         }
 
         bool is_root() const {
@@ -117,27 +82,45 @@ private:
             }
             else {
                 Edge& edge = expl_parent->map.find(text[delta_start])->second;
-                
+
                 int new_edge_finish = (edge.to == nullptr) ? i - 1 : edge.finish;
                 int new_edge_start = delta_finish + 1;
-                
+
                 Node* new_node = new Node;
                 new_node->map.insert({text[new_edge_start], {new_edge_start, new_edge_finish, edge.to}});
                 new_node->map.insert({symbol, {i, -1, nullptr}});
-                
+
                 edge.finish = delta_finish;
                 edge.to = new_node;
                 //todo посчитать suffix_link для new_node
             }
         }
 
-
-
-
         void move_down(char symbol) {
-            //todo
+            // точно знаем, что symbol есть в продолжении текущей локации
+            const Edge& edge = expl_parent->map.find(symbol)->second;
+            if (is_explicit()) {
+                if (edge.get_len() > 1 || (edge.get_len() == 1 && edge.to == nullptr)) {
+                    delta_start = edge.start;
+                    delta_finish = edge.start;
+                }
+                else {
+                    expl_parent = edge.to;
+                    delta_start = -1;
+                    delta_finish = -1;
+                }
+            }
+            else {
+                if (delta_finish == edge.finish - 1 && edge.to != nullptr) {
+                    expl_parent = edge.to;
+                    delta_start = -1;
+                    delta_finish = -1;
+                }
+                else {
+                    ++delta_finish;
+                }
+            }
         }
-
     };
 
 
