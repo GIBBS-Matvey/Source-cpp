@@ -36,7 +36,7 @@ private:
                  const Node* const root, const std::string& text) : expl_parent(expl_parent), root(root), text(text),
                  delta_start(delta_start), delta_finish(delta_finish){}
 
-        void move_next() {
+        void move_suffix_link() {
             if (is_explicit()) {
                 expl_parent = expl_parent->suffix_link;
             }
@@ -96,6 +96,48 @@ private:
             return delta_start == -1;
         }
 
+
+
+
+        bool has_symbol_after(char symbol) {
+            // точно вызвали функцию не от листовой вершины
+            if (is_explicit()) {
+                return expl_parent->map.find(symbol) != expl_parent->map.end();
+            }
+            else {
+                return text[delta_finish + 1] == symbol;
+            }
+        }
+
+
+
+        void add_symbol(char symbol, int i) {
+            if (is_explicit()) {
+                expl_parent->map.insert({symbol, {i, -1, nullptr}});
+            }
+            else {
+                Edge& edge = expl_parent->map.find(text[delta_start])->second;
+                
+                int new_edge_finish = (edge.to == nullptr) ? i - 1 : edge.finish;
+                int new_edge_start = delta_finish + 1;
+                
+                Node* new_node = new Node;
+                new_node->map.insert({text[new_edge_start], {new_edge_start, new_edge_finish, edge.to}});
+                new_node->map.insert({symbol, {i, -1, nullptr}});
+                
+                edge.finish = delta_finish;
+                edge.to = new_node;
+                //todo посчитать suffix_link для new_node
+            }
+        }
+
+
+
+
+        void move_down(char symbol) {
+            //todo
+        }
+
     };
 
 
@@ -107,66 +149,27 @@ public:
         root->map.insert({text[0], {0, 0, nullptr}});
         Location loc(root, 0, 0, root, text);
 
+        char new_sym;
+
         for (int i = 0; i < text.size(); ++i) {
-            char new_sym = text[i];
+            new_sym = text[i];
 
-            while (loc.is_leaf()) {
-                loc.move_next();
+            while (loc.is_leaf()) { /// скипаем все листы
+                loc.move_suffix_link();
             }
 
-            // попали на первую нелистовую вершину
+            while (!loc.has_symbol_after(new_sym)) { /// продуктивный блок - добавление новых рёбер
+                loc.add_symbol(new_sym, i);
 
-            bool processed = false;
-
-            while (!processed) {
-
-
-                if (loc.is_explicit()) {    /// если находимся в явной вершине
-                    auto it = loc.expl_parent->map.find(new_sym);
-                    const Edge& edge = it->second;
-                    if (it == loc.expl_parent->map.end()) { // если не нашли new_sym в ветках
-                        Edge new_edge = {i, i, nullptr};    // отращиваем ребро
-                        loc.expl_parent->map.insert({new_sym, new_edge});
-                    } else { // если нашли new_sym в каком-то ребре, тогда начинаем с этой локации на след.итерации
-                        loc.delta_start = edge.start;
-                        loc.delta_finish = edge.start;
-                        processed = true;
-                    }
-                }
-
-                else {    /// если находимся в неявной вершине
-                    auto it = loc.expl_parent->map.find(text[loc.delta_start]);
-                    Edge& loc_edge = it->second;
-                    if (text[loc.delta_finish + 1] == new_sym) { // если new_sym лежит дальше по ребру, обновляем локацию для след.итерации
-                        if (loc.delta_len() < loc_edge.get_len()) { // локация остаётся неявной, продлеваем finish на 1
-                            ++loc.delta_finish;
-                        } else {
-                            loc.expl_parent = loc_edge.to; // локация становится явной
-                            loc.delta_start = -1;
-                            loc.delta_finish = -1;
-                        }
-                        processed = true;
-                    }
-                    else { // если new_sym нет дальше по ребру, тогда материализуем Node
-                        Node* new_node = new Node;
-                        if (loc_edge.get_len() > loc.delta_len()) {
-                            int after_index = loc.delta_finish + 1;
-                            new_node->map.insert({text[after_index], {after_index, loc_edge.finish, loc_edge.to}});
-                        }
-                        loc_edge.finish = loc.delta_finish; // +/- 1
-                        loc_edge.to = new_node;
-                        
-                        new_node->map.insert({new_sym, {i, i, nullptr}});
-                        //todo посчитать "руками" суффиксную ссылку для новой ноды и сохранить её в new_node->suffix_link
-                        
-                        loc.move_next();
-                    }
+                if (!loc.is_root()) {
+                    loc.move_suffix_link();
+                } else {
+                    break; // частный случай: когда дошли loc-ом до корня, и у корня тоже нет new_sym
                 }
             }
 
-
+            loc.move_down(new_sym);
         }
-
     }
 
 };
