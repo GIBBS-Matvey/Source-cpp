@@ -38,6 +38,7 @@ private:
                  delta_start(delta_start), delta_finish(delta_finish) {}
 
 
+
         void move_suffix_link() {
             // гарантировано не вызываем от корня
 
@@ -55,7 +56,7 @@ private:
         }
 
         Location skip_count(Node* node, int start, int finish) {
-            // гарантированно спускаемся в неявную нелистовую локацию, которая гарантированно отчитается от этого места
+            // спускаемся из node в явную или неявную локацию (отчитываем T[start:finish])
 
             int cur_len = finish - start + 1;
             int cur_start = start;
@@ -68,9 +69,17 @@ private:
                 cur_edge = &(node->map.find(text[cur_start])->second);
             }
 
-            this->expl_parent = node;
-            this->delta_start = cur_edge->start;
-            this->delta_finish = cur_edge->start + cur_len - 1;
+            if (cur_len < cur_edge->get_len()) {  // случай попадания в неявную локацию из неявной
+                this->expl_parent = node;
+                this->delta_start = cur_edge->start;
+                this->delta_finish = cur_edge->start + cur_len - 1;
+            }
+
+            else if (cur_len == cur_edge->get_len()) {  // случай попадания в явную локацию из неявной
+                this->expl_parent = cur_edge->to;
+                this->delta_start = -1;
+                this->delta_finish = -1;
+            }
         }
 
         bool is_root() const {
@@ -104,7 +113,7 @@ private:
             }
         }
 
-        void add_symbol(char symbol, int i) {
+        void add_symbol(char symbol, int i) const {
             // гарантированно вызываем от явной локации, после которой нет symbol
             expl_parent->map.insert({symbol, {i, -1, nullptr}});
         }
@@ -169,34 +178,83 @@ public:
 
         char new_sym;
 
-        for (int i = 0; i < text.size(); ++i) {
+        for (int i = 1; i < text.size(); ++i) {
             new_sym = text[i];
 
             while (loc.is_leaf()) { /// скипаем все листы
+                std::cout << "was here on i = " << i << '\n';
                 loc.move_suffix_link();
             }
 
-            // попадаем на первую нелистовую вершину
+            /// попадаем в первую нелистовую вершину
             Node* new_node = nullptr;
+            bool added = false;
             while (!loc.has_symbol_after(new_sym)) {
 
                 if (loc.is_explicit()) {
                     loc.add_symbol(new_sym, i);
+                    if (new_node && !added) {
+                        new_node->suffix_link = loc.expl_parent;
+                        added = true;
+                    }
                 } else {
                     new_node = loc.create_new_node(new_sym, i, new_node);   /// продуктивный блок - добавление новых рёбер
                 }
-                
+
                 if (!loc.is_root()) {
                     loc.move_suffix_link();
                 } else {
                     break; // todo частный случай: когда дошли loc-ом до корня, и у корня тоже нет new_sym
                 }
             }
-            
-            // todo тут может остаться new_node, у которой не инициализирована suffix_link
-            
+
+            if (new_node && !added) {
+                new_node->suffix_link = loc.expl_parent;
+            }
             loc.move_down(new_sym);
         }
     }
 
+    bool has_substring(const std::string& target) {
+        Node* cur_node = root;
+        int cur_index = 0;
+
+        while (true) {
+
+            auto it = cur_node->map.find(target[cur_index]);
+            if (it == cur_node->map.end()) {
+                return false;
+            }
+            const Edge* edge_ptr = &it->second;
+
+            int edge_index = edge_ptr->start;
+            int edge_finish = (edge_ptr->to != nullptr) ? edge_ptr->finish : text.size() - 1;
+            while (edge_index <= edge_finish) {
+                if (text[edge_index] != target[cur_index]) {
+                    return false;
+                }
+                ++edge_index;
+                ++cur_index;
+                if (cur_index == target.size()) {
+                    return true;
+                }
+            }
+
+            if (edge_ptr->to) {
+                cur_node = edge_ptr->to;
+            } else {
+                return false;
+            }
+        }
+
+    }
+
 };
+
+int main() {
+    std::string text = "aba";
+    Suffix_Tree tree(text);
+    std::cout << "ok\n";
+    std::cout << tree.has_substring("a");
+    return 0;
+}
