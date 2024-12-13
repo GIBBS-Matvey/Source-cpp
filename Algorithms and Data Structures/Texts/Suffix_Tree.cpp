@@ -55,7 +55,7 @@ private:
             }
         }
 
-        Location skip_count(Node* node, int start, int finish) {
+        void skip_count(Node* node, int start, int finish) {
             // спускаемся из node в явную или неявную локацию (отчитываем T[start:finish])
 
             int cur_len = finish - start + 1;
@@ -71,8 +71,13 @@ private:
 
             if (cur_len < cur_edge->get_len()) {  // случай попадания в неявную локацию из неявной
                 this->expl_parent = node;
-                this->delta_start = cur_edge->start;
-                this->delta_finish = cur_edge->start + cur_len - 1;
+                if (cur_len == 0) {
+                    this->delta_start = -1;
+                    this->delta_finish = -1;
+                } else {
+                    this->delta_start = cur_edge->start;
+                    this->delta_finish = cur_edge->start + cur_len - 1;
+                }
             }
 
             else if (cur_len == cur_edge->get_len()) {  // случай попадания в явную локацию из неявной
@@ -185,6 +190,7 @@ public:
                 std::cout << "was here on i = " << i << '\n';
                 loc.move_suffix_link();
             }
+            std::cout << "be here\n";
 
             /// попадаем в первую нелистовую вершину
             Node* new_node = nullptr;
