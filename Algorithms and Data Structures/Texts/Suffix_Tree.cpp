@@ -7,14 +7,16 @@ private:
     struct Node;
     struct Location;
 
+    static int iter_index;
+
     struct Edge {
         int start;
         int finish;
         Node* to;
 
-        int get_len() const {
+        /*int get_len() const {
             return finish - start + 1;
-        }
+        }*/
     };
 
     struct Node {
@@ -62,14 +64,14 @@ private:
             int cur_start = start;
             const Edge* cur_edge = &(node->map.find(text[cur_start])->second);
 
-            while (cur_len > cur_edge->get_len()) {
+            while (cur_len > get_edge_len(*cur_edge)) {
                 node = cur_edge->to;
-                cur_start += cur_edge->get_len();
-                cur_len -= cur_edge->get_len();
+                cur_start += get_edge_len(*cur_edge);
+                cur_len -= get_edge_len(*cur_edge);
                 cur_edge = &(node->map.find(text[cur_start])->second);
             }
 
-            if (cur_len < cur_edge->get_len()) {  // случай попадания в неявную локацию из неявной
+            if (cur_len < get_edge_len(*cur_edge)) {  // случай попадания в неявную локацию из неявной
                 this->expl_parent = node;
                 if (cur_len == 0) {
                     this->delta_start = -1;
@@ -80,7 +82,7 @@ private:
                 }
             }
 
-            else if (cur_len == cur_edge->get_len()) {  // случай попадания в явную локацию из неявной
+            else if (cur_len == get_edge_len(*cur_edge)) {  // случай попадания в явную локацию из неявной
                 this->expl_parent = cur_edge->to;
                 this->delta_start = -1;
                 this->delta_finish = -1;
@@ -95,7 +97,7 @@ private:
             if (!is_explicit()) {
                 auto it = expl_parent->map.find(text[delta_start]);
                 const Edge& edge = it->second;
-                return edge.get_len() == delta_len();
+                return get_edge_len(edge) == delta_len();
             }
             return false;
         }
@@ -116,6 +118,11 @@ private:
             else {
                 return text[delta_finish + 1] == symbol;
             }
+        }
+
+        int get_edge_len(const Edge& edge) const {
+            int real_len = (edge.to == nullptr) ? iter_index : edge.finish - edge.start + 1;
+            return real_len;
         }
 
         void add_symbol(char symbol, int i) const {
@@ -146,20 +153,24 @@ private:
 
         void move_down(char symbol) {
             // точно знаем, что symbol есть в продолжении текущей локации
+            std::cout << "move_down_start\n";
 
             const Edge& edge = expl_parent->map.find(symbol)->second;
             if (is_explicit()) {
-                if (edge.get_len() > 1 || (edge.get_len() == 1 && edge.to == nullptr)) {
+                if (get_edge_len(edge) > 1 || (get_edge_len(edge) == 1 && edge.to == nullptr)) {
                     delta_start = edge.start;
                     delta_finish = edge.start;
+                    std::cout << "move_down_be_here\n";
                 }
                 else {
+                    std::cout << "move_down_be_here_3\n";
                     expl_parent = edge.to;
                     delta_start = -1;
                     delta_finish = -1;
                 }
             }
             else {
+                std::cout << "move_down_be_here_implicit\n";
                 if (delta_finish == edge.finish - 1 && edge.to != nullptr) {
                     expl_parent = edge.to;
                     delta_start = -1;
@@ -169,6 +180,8 @@ private:
                     ++delta_finish;
                 }
             }
+
+            std::cout << "move_down_finish\n";
         }
     };
 
@@ -182,8 +195,10 @@ public:
         Location loc(root, 0, 0, root, text);
 
         char new_sym;
+        iter_index = 0;
 
         for (int i = 1; i < text.size(); ++i) {
+            iter_index = i;
             new_sym = text[i];
 
             while (loc.is_leaf()) { /// скипаем все листы
@@ -257,10 +272,12 @@ public:
 
 };
 
+int Suffix_Tree::iter_index = 0;
+
 int main() {
     std::string text = "aba";
     Suffix_Tree tree(text);
-    std::cout << "ok\n";
-    std::cout << tree.has_substring("a");
+    std::cout << "built\n";
+    std::cout << tree.has_substring("ab");
     return 0;
 }
