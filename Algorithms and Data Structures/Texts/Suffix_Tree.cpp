@@ -148,7 +148,6 @@ private:
                 prev_node->suffix_link = new_node;
             }
             return new_node;
-            //todo посчитать suffix_link для new_node
         }
 
         void move_down(char symbol) {
@@ -275,9 +274,10 @@ public:
 int Suffix_Tree::iter_index = 0;
 
 int main() {
-    std::string text = "aba";
+    std::string text = "abacaba";
     Suffix_Tree tree(text);
     std::cout << "built\n";
-    std::cout << tree.has_substring("ab");
+    std::cout << "abac - found_status: " << tree.has_substring("abac") << '\n';
+    std::cout << "c - found_status: "<< tree.has_substring("c");
     return 0;
 }
