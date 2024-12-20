@@ -1,6 +1,8 @@
 #include <iostream>
 #include <map>
 #include <queue>
+#include <random>
+#include <unordered_set>
 
 class Suffix_Tree {
 private:
@@ -369,21 +371,68 @@ public:
 };
 
 
+int naive_substrings_number(const std::string& text) {
+    std::unordered_set<std::string> h_t;
+
+    for (int i = 0; i < text.size(); ++i) {
+        for (int j = i; j < text.size(); ++j) {
+            std::string sub_str;
+            for (int k = i; k <= j; ++k) {
+                sub_str += text[k];
+            }
+            if (h_t.find(sub_str) == h_t.end()) {
+                h_t.insert(sub_str);
+            }
+        }
+    }
+
+    return h_t.size();
+}
+
 void stress_testing() {
-    int max_len = 10;
+    int test_number = 1000;
+    int max_len = 8;
     std::string text;
-    
-    
-    
+    std::random_device dev;
+    std::mt19937 generator(dev());
+    std::uniform_int_distribution<int> first_distribution(97, 99);
+
+    int rand_index;
+    bool success = true;
+
+    for (int j = 0; j < test_number; ++j) {
+        text = "";
+        for (int i = 0; i < max_len; ++i) {
+            rand_index = first_distribution(generator);
+            text += char(rand_index);
+        }
+
+        Suffix_Tree tree(text);
+        int my_answer = tree.substrings_number();
+        int correct_answer = naive_substrings_number(text);
+
+        std::cout << "test number: " << j + 1 << '\n';
+        std::cout << text << '\n';
+        if (my_answer != correct_answer) {
+            std::cout << "Error: correct answer: " << correct_answer << " ; my_answer: " << my_answer << '\n';
+            std::cout << "text: " << text << '\n';
+            tree.bfs_print_tree();
+            success = false;
+            break;
+        } else {
+            std::cout << "success: correct answer: " << correct_answer << " ; my_answer: " << my_answer << '\n';
+        }
+        std::cout << '\n';
+    }
+
+    if (success) {
+        std::cout << "All tests are completed.\n";
+    }
 }
 
 
-
-
 int main() {
-    std::string text;
-    std::cin >> text;
-    Suffix_Tree tree(text);
-    std::cout << tree.substrings_number();
+    Suffix_Tree tree("cbcbacbb");
+    tree.bfs_print_tree();
     return 0;
 }
