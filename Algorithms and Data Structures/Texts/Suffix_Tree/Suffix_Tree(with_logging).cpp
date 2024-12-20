@@ -38,7 +38,7 @@ private:
 
 
 
-        void move_suffix_link() {
+                 void move_suffix_link() {
             // гарантировано не вызываем от корня
             if (is_explicit()) {
                 expl_parent = expl_parent->suffix_link;
@@ -112,14 +112,15 @@ private:
         }
 
         int delta_len() const {
-            return std::max(0, delta_finish - delta_start + 1);
+            int real_delta_len = (delta_start != -1) ? delta_finish - delta_start + 1 : 0;
+            return real_delta_len;
         }
 
         bool is_explicit() const {
             return delta_start == -1 && delta_finish == -1;
         }
 
-        bool has_symbol_after(char symbol) {
+        bool has_symbol_after(char symbol) const {
             // точно вызвали функцию не от листовой вершины
             if (is_explicit()) {
                 return expl_parent->map.find(symbol) != expl_parent->map.end();
@@ -137,6 +138,9 @@ private:
         void add_symbol(char symbol, int i) const {
             // гарантированно вызываем от явной локации, после которой нет symbol
             expl_parent->map.insert({symbol, {i, -1, nullptr}});
+            const Edge& edge = expl_parent->map.find(symbol)->second;
+            std::cout << "new edge created: edge_start = " << edge.start << " ; edge.finish = " << edge.finish <<
+            " edge.to == nullptr ? " << (edge.to == nullptr) <<'\n';
         }
 
         Node* create_new_node(char symbol, int i, Node* prev_node) const {
@@ -156,18 +160,18 @@ private:
             if (prev_node != nullptr) {
                 prev_node->suffix_link = new_node;
             }
-            std::cout << "cuting cur edge: edge.start = " << edge.start << " ; edge.finish = " << edge.finish << '\n'; 
+            std::cout << "cuting cur edge: edge.start = " << edge.start << " ; edge.finish = " << edge.finish << '\n';
             return new_node;
         }
 
         void move_down(char symbol) {
             // точно знаем, что symbol есть в продолжении текущей локации
-            std::cout << "move down description: " << '\n';
-            const Edge& edge = expl_parent->map.find(symbol)->second;
             if (is_explicit()) {
+                const Edge& edge = expl_parent->map.find(symbol)->second;
                 std::cout << "cur_loc is explicit" << '\n';
                 int real_edge_len = (edge.to == nullptr) ? get_edge_len(edge) + 1 : get_edge_len(edge);
-                std::cout << "edge_len = " << real_edge_len << '\n';
+                std::cout << "real_edge_len = " << real_edge_len << '\n';
+                std::cout << "edge.to = nullptr ? " << (edge.to == nullptr) << '\n';
                 if (real_edge_len > 1 || (real_edge_len == 1 && edge.to == nullptr)) {
                     std::cout << "move down on one symbol" << '\n';
                     delta_start = edge.start;
@@ -182,6 +186,8 @@ private:
             }
             else {
                 std::cout << "cur_loc is implicit" << '\n';
+                const Edge& edge = expl_parent->map.find(text[delta_start])->second;
+                std::cout << "delta_len = " << delta_len() << " ; edge_len = " << get_edge_len(edge) << '\n';
                 if (delta_len() == get_edge_len(edge) - 1 && edge.to != nullptr) {
                     std::cout << "move down to next node" << '\n';
                     expl_parent = edge.to;
@@ -213,6 +219,9 @@ public:
         root = new Node;
         root->suffix_link = nullptr;
         root->map.insert({text[0], {0, 0, nullptr}});
+        const Edge& edge = root->map.find(text[0])->second;
+        std::cout << "new edge created: edge_start = " << edge.start << " ; edge.finish = " << edge.finish << '\n';
+
         Location loc(root, 0, 0, root, text);
         std::cout << "created the first node with edge: " << text[0] << '\n';
         std::cout << "put start loc on this edge" << "\n";
@@ -350,8 +359,7 @@ int Suffix_Tree::iter_index = 0;
 
 
 int main() {
-    std::string text = "abcabb0";
-    Suffix_Tree tree(text);
+    Suffix_Tree tree("aabax");
     tree.bfs_print_tree();
     return 0;
 }
