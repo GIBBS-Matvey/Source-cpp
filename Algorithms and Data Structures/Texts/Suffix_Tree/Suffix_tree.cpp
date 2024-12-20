@@ -11,8 +11,8 @@ private:
     struct Location;
 
     struct Edge {
-        int start;
-        int finish;
+        long long int start;
+        long long int finish;
         Node* to;
     };
 
@@ -26,15 +26,15 @@ private:
 
     struct Location {
         Node* expl_parent;
-        int delta_start;
-        int delta_finish;
-        const int& iter_index;
+        long long int delta_start;
+        long long int delta_finish;
+        const long long int& iter_index;
 
         Node* root;
         const std::string& text;
 
-        Location(Node* expl_parent, int delta_start, int delta_finish,
-                 Node* root, const std::string& text, const int& iter_index) : expl_parent(expl_parent), root(root), text(text),
+        Location(Node* expl_parent, long long int delta_start, long long int delta_finish,
+                 Node* root, const std::string& text, const long long int& iter_index) : expl_parent(expl_parent), root(root), text(text),
                  delta_start(delta_start), delta_finish(delta_finish), iter_index(iter_index) {}
 
 
@@ -54,15 +54,8 @@ private:
             }
         }
 
-        /*void print_loc() {
-            std::cout << "expl_parent = " << expl_parent << '\n';
-            std::cout << "delta_start = " << delta_start << '\n';
-            std::cout << "delta_finish = " << delta_finish << '\n';
-        }*/
-
-        void skip_count(Node* node, int start, int finish) {
+        void skip_count(Node* node, long long int start, long long int finish) {
             // спускаемся из node в явную или неявную локацию (отчитываем T[start:finish])
-            //std::cout << "call skip_count: start = " << start << ", finish = " << finish << '\n';
             int cur_len = finish - start + 1;
             if (cur_len <= 0) {
                 this->expl_parent = node;
@@ -106,14 +99,14 @@ private:
             if (!is_explicit()) {
                 auto it = expl_parent->map.find(text[delta_start]);
                 const Edge& edge = it->second;
-                //std::cout << "in leaf checking: edge_len = " << get_edge_len(edge) << " ; delta_len = " << delta_len() << '\n';
                 return get_edge_len(edge) == delta_len();
             }
             return false;
         }
 
-        int delta_len() const {
-            return std::max(0, delta_finish - delta_start + 1);
+        long long int delta_len() const {
+            long long int real_delta_len = (delta_start != -1) ? delta_finish - delta_start + 1 : 0;
+            return real_delta_len;
         }
 
         bool is_explicit() const {
@@ -130,22 +123,22 @@ private:
             }
         }
 
-        int get_edge_len(const Edge& edge) const {
-            int real_len = (edge.to == nullptr) ? iter_index - edge.start : edge.finish - edge.start + 1;
+        long long int get_edge_len(const Edge& edge) const {
+            long long int real_len = (edge.to == nullptr) ? iter_index - edge.start : edge.finish - edge.start + 1;
             return real_len;
         }
 
-        void add_symbol(char symbol, int i) const {
+        void add_symbol(char symbol, long long int i) const {
             // гарантированно вызываем от явной локации, после которой нет symbol
             expl_parent->map.insert({symbol, {i, -1, nullptr}});
         }
 
-        Node* create_new_node(char symbol, int i, Node* prev_node) const {
+        Node* create_new_node(char symbol, long long int i, Node* prev_node) const {
             // гарантированно вызываем от неявной локации, после которой нет symbol
             Edge& edge = expl_parent->map.find(text[delta_start])->second;
 
-            int new_edge_finish = (edge.to == nullptr) ? i - 1 : edge.finish;
-            int new_edge_start = delta_finish + 1;
+            long long int new_edge_finish = (edge.to == nullptr) ? i - 1 : edge.finish;
+            long long int new_edge_start = delta_finish + 1;
 
             Node* new_node = new Node;
             new_node->map.insert({text[new_edge_start], {new_edge_start, new_edge_finish, edge.to}});
@@ -157,47 +150,39 @@ private:
             if (prev_node != nullptr) {
                 prev_node->suffix_link = new_node;
             }
-            //std::cout << "cuting cur edge: edge.start = " << edge.start << " ; edge.finish = " << edge.finish << '\n';
             return new_node;
         }
 
         void move_down(char symbol) {
             // точно знаем, что symbol есть в продолжении текущей локации
-            //std::cout << "move down description: " << '\n';
-            const Edge& edge = expl_parent->map.find(symbol)->second;
             if (is_explicit()) {
-                //std::cout << "cur_loc is explicit" << '\n';
-                int real_edge_len = (edge.to == nullptr) ? get_edge_len(edge) + 1 : get_edge_len(edge);
-                //std::cout << "edge_len = " << real_edge_len << '\n';
+                const Edge& edge = expl_parent->map.find(symbol)->second;
+                long long int real_edge_len = (edge.to == nullptr) ? get_edge_len(edge) + 1 : get_edge_len(edge);
                 if (real_edge_len > 1 || (real_edge_len == 1 && edge.to == nullptr)) {
-                    //std::cout << "move down on one symbol" << '\n';
                     delta_start = edge.start;
                     delta_finish = edge.start;
                 }
                 else {
-                    //std::cout << "move down to next node" << '\n';
                     expl_parent = edge.to;
                     delta_start = -1;
                     delta_finish = -1;
                 }
             }
             else {
-                //std::cout << "cur_loc is implicit" << '\n';
+                const Edge& edge = expl_parent->map.find(text[delta_start])->second;
                 if (delta_len() == get_edge_len(edge) - 1 && edge.to != nullptr) {
-                    //std::cout << "move down to next node" << '\n';
                     expl_parent = edge.to;
                     delta_start = -1;
                     delta_finish = -1;
                 } else {
-                    //std::cout << "move down on one symbol" << '\n';
                     ++delta_finish;
                 }
             }
         }
     };
 
-    int get_edge_len(const Edge& edge) const {
-        int real_len = (edge.to == nullptr) ? text.size() - edge.start : edge.finish - edge.start + 1;
+    long long int get_edge_len(const Edge& edge) const {
+        long long int real_len = (edge.to == nullptr) ? text.size() - edge.start : edge.finish - edge.start + 1;
         return real_len;
     }
 
@@ -214,68 +199,37 @@ public:
         root = new Node;
         root->suffix_link = nullptr;
         root->map.insert({text[0], {0, 0, nullptr}});
-        int iter_index = 0;
+        long long int iter_index = 0;
         Location loc(root, 0, 0, root, text, iter_index);
-        //std::cout << "created the first node with edge: " << text[0] << '\n';
-        //std::cout << "put start loc on this edge" << "\n";
-
-        //loc.print_loc();
-
         char new_sym;
         iter_index = 0;
 
-        for (int i = 1; i < text.size(); ++i) {
-
+        for (long long int i = 1; i < text.size(); ++i) {
             iter_index = i;
             new_sym = text[i];
-            //std::cout << "\niter_index = " << iter_index << '\n';
-            //std::cout << "ADDING NEW SYMBOL: " << text[i] << '\n';
 
-            //std::cout << "beginning: ";
-            /*if (loc.is_root()) {
-                std::cout << "in root" << '\n';
-            } else {
-                std::cout << "not in root" << '\n';
-            }
-            std::cout << '\n';*/
-
-            //loc.print_loc();
-            /*if (!loc.is_leaf()) {
-                std::cout << "no skipping, loc is not leaf" << '\n';
-            }*/
             while (loc.is_leaf()) { // скипаем все листы
-                //std::cout << "skip leaf" << '\n';
                 loc.move_suffix_link();
-                //loc.print_loc();
             }
-            //std::cout << '\n';
 
             // попадаем в первую нелистовую вершину
-            //std::cout << "stand on not-leaf" << '\n';
             Node* new_node = nullptr;
             bool added = false;
 
             while (!loc.has_symbol_after(new_sym)) {
-                //std::cout << "no cur_symbol in continue" << '\n';
                 if (loc.is_explicit()) {
-                    //std::cout << "loc is explicit => add new edge with symbol " << new_sym << '\n';
                     loc.add_symbol(new_sym, i);
                     if (new_node && !added) {
-                        //std::cout << "init suffix_link for prev node" << '\n';
                         new_node->suffix_link = loc.expl_parent;
                         added = true;
                     }
                 } else {
                     new_node = loc.create_new_node(new_sym, i, new_node);   // продуктивный блок - добавление новых рёбер
-                    //std::cout << "loc is implicit => create new node" << '\n';
                 }
 
                 if (!loc.is_root()) {
                     loc.move_suffix_link();
-                    //std::cout << "move suffix_link" << '\n';
-                    //loc.print_loc();
                 } else {
-                    //std::cout << "no move, because stand in root" << '\n';
                     break;
                 }
             }
@@ -283,11 +237,7 @@ public:
             if (new_node && !added) {
                 new_node->suffix_link = loc.expl_parent;
             }
-            //std::cout << "move down on symbol " << new_sym << '\n';
             loc.move_down(new_sym);
-            //loc.print_loc();
-
-            // todo возможно, сейчас проблема с инициализацией suffix_link для новых нод
         }
     }
 
@@ -322,7 +272,6 @@ public:
                 return false;
             }
         }
-
     }
 
     void bfs_print_tree() const {
@@ -346,11 +295,11 @@ public:
         }
     }
 
-    int substrings_number() const {
+    long long int substrings_number() const {
         Node* cur;
         std::queue<Node*> q;
         q.push(root);
-        int answer = 0;
+        long long int answer = 0;
         while (!q.empty()) {
             cur = q.front();
             q.pop();
@@ -366,7 +315,18 @@ public:
     }
 
     ~Suffix_Tree() {
-        //todo
+        std::queue<Node*> q;
+        q.push(root);
+        Node* cur_front;
+        while (!q.empty()) {
+            cur_front = q.front();
+            q.pop();
+            for (const auto& pair : cur_front->map) {
+                if (pair.second.to) {
+                    q.push(pair.second.to);
+                }
+            }
+        }
     }
 };
 
@@ -385,17 +345,16 @@ int naive_substrings_number(const std::string& text) {
             }
         }
     }
-
     return h_t.size();
 }
 
 void stress_testing() {
-    int test_number = 1000;
-    int max_len = 8;
+    int test_number = 10000;
+    int max_len = 100;
     std::string text;
     std::random_device dev;
     std::mt19937 generator(dev());
-    std::uniform_int_distribution<int> first_distribution(97, 99);
+    std::uniform_int_distribution<int> first_distribution(97, 105);
 
     int rand_index;
     bool success = true;
@@ -432,7 +391,9 @@ void stress_testing() {
 
 
 int main() {
-    Suffix_Tree tree("cbcbacbb");
-    tree.bfs_print_tree();
+    std::string text;
+    std::cin >> text;
+    Suffix_Tree tree(text);
+    std::cout << tree.substrings_number();
     return 0;
 }
