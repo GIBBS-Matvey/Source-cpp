@@ -156,6 +156,7 @@ private:
             if (prev_node != nullptr) {
                 prev_node->suffix_link = new_node;
             }
+            std::cout << "cuting cur edge: edge.start = " << edge.start << " ; edge.finish = " << edge.finish << '\n'; 
             return new_node;
         }
 
@@ -165,8 +166,9 @@ private:
             const Edge& edge = expl_parent->map.find(symbol)->second;
             if (is_explicit()) {
                 std::cout << "cur_loc is explicit" << '\n';
-                std::cout << "edge_len = " << get_edge_len(edge) + 1 << '\n';
-                if (get_edge_len(edge) + 1 > 1 || (get_edge_len(edge) + 1 == 1 && edge.to == nullptr)) {
+                int real_edge_len = (edge.to == nullptr) ? get_edge_len(edge) + 1 : get_edge_len(edge);
+                std::cout << "edge_len = " << real_edge_len << '\n';
+                if (real_edge_len > 1 || (real_edge_len == 1 && edge.to == nullptr)) {
                     std::cout << "move down on one symbol" << '\n';
                     delta_start = edge.start;
                     delta_finish = edge.start;
@@ -348,7 +350,7 @@ int Suffix_Tree::iter_index = 0;
 
 
 int main() {
-    std::string text = "abacabax";
+    std::string text = "abcabb0";
     Suffix_Tree tree(text);
     tree.bfs_print_tree();
     return 0;
