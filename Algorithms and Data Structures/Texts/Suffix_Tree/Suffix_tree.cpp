@@ -306,6 +306,7 @@ public:
                     q.push(pair.second.to);
                 }
             }
+            delete cur_front;
         }
     }
 };
