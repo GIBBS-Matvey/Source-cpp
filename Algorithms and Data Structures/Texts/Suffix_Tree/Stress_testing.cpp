@@ -3,6 +3,8 @@
 #include <queue>
 #include <random>
 #include <unordered_set>
+#include <chrono>
+
 
 class Suffix_Tree {
 private:
@@ -39,7 +41,7 @@ private:
 
 
 
-        void move_suffix_link() {
+                 void move_suffix_link() {
             // гарантировано не вызываем от корня
             if (is_explicit()) {
                 expl_parent = expl_parent->suffix_link;
@@ -350,8 +352,8 @@ int naive_substrings_number(const std::string& text) {
 }
 
 void stress_testing() {
-    int test_number = 10000;
-    int max_len = 100;
+    int test_number = 100;
+    int max_len = 10000;
     std::string text;
     std::random_device dev;
     std::mt19937 generator(dev());
@@ -367,9 +369,18 @@ void stress_testing() {
             text += char(rand_index);
         }
 
+        auto my_begin = std::chrono::steady_clock::now();
+
         Suffix_Tree tree(text);
         int my_answer = tree.substrings_number();
+
+        auto my_end = std::chrono::steady_clock::now();
+        auto my_time = std::chrono::duration_cast<std::chrono::milliseconds>(my_end - my_begin);
+
+        auto naive_begin = std::chrono::steady_clock::now();
         int correct_answer = naive_substrings_number(text);
+        auto naive_end = std::chrono::steady_clock::now();
+        auto naive_time = std::chrono::duration_cast<std::chrono::milliseconds>(naive_end - naive_begin);
 
         std::cout << "test number: " << j + 1 << '\n';
         std::cout << text << '\n';
@@ -381,6 +392,7 @@ void stress_testing() {
             break;
         } else {
             std::cout << "success: correct answer: " << correct_answer << " ; my_answer: " << my_answer << '\n';
+            std::cout << "naive_time: " << naive_time.count() << "ms ; suffix_tree_time: " << my_time.count() << "ms\n";
         }
         std::cout << '\n';
     }
@@ -392,9 +404,6 @@ void stress_testing() {
 
 
 int main() {
-    std::string text;
-    std::cin >> text;
-    Suffix_Tree tree(text);
-    std::cout << tree.substrings_number();
+    stress_testing();
     return 0;
 }
