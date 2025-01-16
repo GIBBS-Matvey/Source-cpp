@@ -19,4 +19,4 @@
 ### Формат вывода:
 Выведите `Q` строк, i-я из которых должна содержать ответ на i-й запрос. Если подходящая строка существует, то выведите её порядковый номер в словаре. Иначе выведите -1.
 
-![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Autocompletion_on_minimals/Images/Autocompletion.jpg)
+<img src="https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Autocompletion_on_minimals/Images/Autocompletion.jpg" width="700">
