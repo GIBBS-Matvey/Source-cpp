@@ -16,4 +16,5 @@ $dist(i, S) = \sum\limits_{j\in S}|a_i - a_j|$.
 
 Выведите $n$ целых чисел: значения $f(i)$ для $i = 1, i = 2, ..., i = n$.
 
-
+<img src="https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Distance/Images/ex_1_dist.PNG" width="700">
+<img src="https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Distance/Images/ex_2_dist.PNG" width="700">
