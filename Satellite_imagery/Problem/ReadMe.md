@@ -22,5 +22,5 @@ $(−10^9, −10^9)$ и $(10^9, 10^9)$. Карта разбита на $4\cdot 1
 
 Выведите $n$ чисел, $i$-е из которых должно быть равно количеству квадратов, для которых самым актуальным будет снимок, полученный в $i$-й день.
 
-![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Satellite imagery/Images/ex_photos.PNG)
-![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Satellite imagery/Images/ex_2_photos.PNG)
+![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Satellite_imagery/Images/ex_photos.PNG)
+![Иллюстрация к проекту](https://github.com/GiBBS-Matvey/Source-cpp/raw/master/Satellite_imagery/Images/ex_2_photos.PNG)
