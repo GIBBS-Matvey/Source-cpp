@@ -11,13 +11,7 @@ private:
 
 public:
     Solution(const std::vector<int>& values, int target) : v(values), target(target), answer(1) {
-        int index_target;
-        for (int i = 0; i < v.size(); ++i) {
-            if (target == v[i]) {
-                index_target = i;
-                break;
-            }
-        }
+        int index_target = std::find(v.begin(), v.end(), target) - v.begin();
         std::vector<int> left_parts = get_left_parts(index_target);
         std::vector<int> right_parts = get_right_parts(index_target);
 
@@ -73,6 +67,7 @@ public:
         return answer;
     }
 };
+
 
 int main() {
     size_t n;
