@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <random>
+#include <unordered_set>
 
 
 class Solution {
@@ -102,19 +104,45 @@ public:
 };
 
 void stress_testing() {
-    //todo
+    std::random_device dev;
+    std::mt19937 generator(dev());
+    int size = 300;
+    std::uniform_int_distribution<int> first_distribution(1, size);
+    int test_number = 1000;
+
+    bool success = true;
+    for (int k = 0; k < test_number; ++k) {
+        std::unordered_set<int> hash_table;
+        std::vector<int> v;
+        v.reserve(size);
+        for (int i = 0; i < size; ++i) {
+            int rand_value;
+            do {
+                rand_value = first_distribution(generator);
+            } while (hash_table.find(rand_value) != hash_table.end());
+            v.push_back(rand_value);
+            hash_table.insert(rand_value);
+        }
+        int target = first_distribution(generator);
+        Solution solution(v, target);
+        Trivial_Solution tr_solution(v, target);
+        int sol_answer = solution.get_answer();
+        int tr_answer = tr_solution.get_answer();
+        if (sol_answer != tr_answer) {
+            std::cout << "Error on test " << k + 1 << " ; my_answer = " << sol_answer << ", real_answer = " << tr_answer << '\n';
+            success = false;
+            break;
+        } else {
+            std::cout << "test number: " << k + 1 << " - Ok\n";
+            std::cout << "my answer: " << sol_answer << " ; correct_answer: " << tr_answer << "\n\n";
+        }
+    }
+    if (success) {
+        std::cout << "All tests completed\n";
+    }
 }
 
 int main() {
-    size_t n;
-    std::cin >> n;
-    int target;
-    std::cin >> target;
-    std::vector<int> v(n);
-    for (size_t i = 0; i < v.size(); ++i) {
-        std::cin >> v[i];
-    }
-    Trivial_Solution tr_solution(v, target);
-    std::cout << tr_solution.get_answer();
+    stress_testing();
     return 0;
 }
