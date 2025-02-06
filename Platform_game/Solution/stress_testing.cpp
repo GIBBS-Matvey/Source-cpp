@@ -4,42 +4,43 @@
 #include <random>
 
 
+#include <iostream>
+#include <vector>
+#include <unordered_set>
+
+// preprocessing of all tails in O(n)
+// Main idea: final_location = cur_loc + error_command + tail
+
 class Solution {
 private:
     const std::string& text;
 
-    struct Sequence {
+    struct Tail {
         int cur_forward = 0;
         int left_forward = 0;
         int right_forward = 0;
     };
 
-    std::vector<Sequence> get_sequences() {
-        std::vector<Sequence> v;
+    std::vector<Tail> get_tails() {
+        std::vector<Tail> v;
         v.resize(text.size());
-
         if (text[text.size() - 1] == 'F') {
             v[text.size() - 1].cur_forward = 1;
         }
-
         for (int i = text.size() - 2; i >= 0; --i) {
             v[i] = v[i + 1];
-
             if (text[i] == 'L') {
                 v[i].left_forward += v[i].cur_forward;
                 v[i].cur_forward = 0;
             }
-
             else if (text[i] == 'R') {
                 v[i].right_forward += v[i + 1].cur_forward;
                 v[i].cur_forward = 0;
             }
-
             else if (text[i] == 'F') {
                 ++v[i].cur_forward;
             }
         }
-
         return v;
     }
 
@@ -47,6 +48,8 @@ private:
     struct Location {
         int x;
         char dir;
+
+        Location() = default;
 
         Location(int x, char dir) : x(x), dir(dir) {}
 
@@ -60,7 +63,9 @@ private:
             return new_loc;
         }
 
-        int operator+(const Sequence& seq) {
+        Location& operator=(const Location& other) = default;
+
+        int operator+(const Tail& seq) {
             x += (dir == 'R') ? seq.cur_forward : -seq.cur_forward;
             x += seq.right_forward;
             x -= seq.left_forward;
@@ -73,20 +78,20 @@ public:
     Solution(const std::string& text) : text(text) {}
 
     int get_answer() {
-
         std::unordered_set<int> un_set;
-        std::vector<Sequence> v_seq = get_sequences();
+        std::vector<Tail> tails = get_tails();
 
-        Location cur_loc(0, 'R');
+        Location cur_loc(0, 'R'), new_loc;
+        int real_command, final_x;
+
         for (int i = 0; i < text.size(); ++i) {
-
-            int real_command = text[i];
+            real_command = text[i];
             std::unordered_set<char> error_commands = {'L', 'R', 'F'};
             error_commands.extract(real_command);
 
             for (char error_command : error_commands) {
-                Location new_cur_loc = cur_loc + error_command;
-                int final_x = (i < text.size() - 1) ? new_cur_loc + v_seq[i + 1] : new_cur_loc.x;
+                new_loc = cur_loc + error_command;
+                final_x = (i < text.size() - 1) ? new_loc + tails[i + 1] : new_loc.x;
                 if (un_set.find(final_x) == un_set.end()) {
                     un_set.insert(final_x);
                 }
@@ -97,7 +102,6 @@ public:
         return un_set.size();
     }
 };
-
 
 int get_naive_x(const std::string& text) {
     int cur_x = 0;
@@ -155,7 +159,7 @@ void stress_testing() {
     for (int i = 0; i < 10000; ++i) {
 
         std::string text;
-        int text_len = 20;
+        int text_len = 1000;
 
         int rand_index;
         for (int j = 0; j < text_len; ++j) {
@@ -166,6 +170,7 @@ void stress_testing() {
         int answer_naive = naive_algo(text);
         Solution solution(text);
         int my_answer = solution.get_answer();
+        std::cout << "test number: " << i + 1 << " : ";
         std::cout << text << ' ' << answer_naive << ' ' << my_answer << '\n';
 
         if (answer_naive != my_answer) {
@@ -185,12 +190,6 @@ void stress_testing() {
 
 
 int main() {
-    /*int n;
-    std::cin >> n;
-    std::string text;
-    std::cin >> text;
-    Solution solution(text);
-    std::cout << solution.get_answer();*/
     stress_testing();
     return 0;
 }
